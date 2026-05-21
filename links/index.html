@@ -187,56 +187,56 @@
         <style>
 .flink {
   margin: 0 auto;
-  max-width: 1040px;
+  max-width: 980px;
 }
 
 .flink h2 {
-  margin: 18px 0 10px;
+  margin: 16px 0 8px;
 }
 
 .flink-desc {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   color: #5c6b72;
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 .flink-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 18px;
-  margin: 18px 0 30px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+  margin: 14px 0 26px;
 }
 
 .flink-list-item {
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fff;
   border: 1px solid #e8edf5;
-  box-shadow: 0 10px 30px rgba(120, 140, 160, 0.12);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  box-shadow: 0 8px 22px rgba(120, 140, 160, 0.1);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   overflow: hidden;
 }
 
 .flink-list-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 38px rgba(102, 175, 239, 0.18);
-  border-color: rgba(102, 175, 239, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(102, 175, 239, 0.16);
+  border-color: rgba(102, 175, 239, 0.34);
 }
 
 .flink-list-item a {
   display: block;
-  padding: 22px 18px 18px;
+  padding: 16px 14px 14px;
   text-align: center;
   text-decoration: none;
   color: inherit;
 }
 
 .flink-item-icon {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 14px;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 12px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid rgba(102, 175, 239, 0.18);
+  border: 2px solid rgba(102, 175, 239, 0.18);
   background: #f5f7fb;
 }
 
@@ -247,21 +247,21 @@
 }
 
 .flink-item-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .flink-item-desc {
-  min-height: 3.6em;
-  line-height: 1.8;
+  min-height: 3.2em;
+  line-height: 1.6;
   color: #5c6b72;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .flink-edit-tip {
-  margin-top: 30px;
-  padding: 16px 18px;
+  margin-top: 24px;
+  padding: 14px 16px;
   border-left: 4px solid #66afef;
   background: rgba(102, 175, 239, 0.08);
   border-radius: 10px;
@@ -273,30 +273,42 @@
 </style>
 
 <div class="flink">
-  <h2>推荐站点</h2>
-  <div class="flink-desc">这里放我常看、常用，或者想推荐给你的博客与网站。</div>
+  <h2>申友们的博客</h2>
+  <div class="flink-desc">这里放我常看、常逛，也想推荐给你的博客。先把几位大佬师傅挂上来。</div>
 
   <div class="flink-list">
     <div class="flink-list-item">
-      <a href="https://hexo.io" title="Hexo" target="_blank" rel="noopener">
+      <a href="https://enp00.github.io/" title="enp0" target="_blank" rel="noopener">
         <div class="flink-item-icon">
-          <img class="no-lightbox" src="/images/avatar.jpg" alt="Hexo" />
+          <img class="no-lightbox" src="https://enp00.github.io/img/touxiang-320.webp" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="enp0" />
         </div>
-        <div class="flink-item-name">Hexo</div>
-        <div class="flink-item-desc" title="Hexo 官方网站，静态博客框架文档和生态入口。">
-          Hexo 官方网站，静态博客框架文档和生态入口。
+        <div class="flink-item-name">enp0</div>
+        <div class="flink-item-desc" title="pwn大肘子啊，很好的师傅，orz了">
+          pwn大肘子啊，很好的师傅，orz了
         </div>
       </a>
     </div>
 
 <pre><code>&lt;div class=&quot;flink-list-item&quot;&gt;
-  &lt;a href=&quot;https://github.com/theme-particlex/hexo-theme-particlex&quot; title=&quot;ParticleX&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+  &lt;a href=&quot;https://n0neme.top/&quot; title=&quot;n0ne&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
     &lt;div class=&quot;flink-item-icon&quot;&gt;
-      &lt;img class=&quot;no-lightbox&quot; src=&quot;/images/custom-particlex-avatar.png&quot; alt=&quot;ParticleX&quot; /&gt;
+      &lt;img class=&quot;no-lightbox&quot; src=&quot;https://n0neme.top/images/123.jpg&quot; onerror=&quot;this.onerror=null;this.src=&#39;/images/avatar.jpg&#39;&quot; alt=&quot;n0ne&quot; /&gt;
     &lt;/div&gt;
-    &lt;div class=&quot;flink-item-name&quot;&gt;ParticleX&lt;/div&gt;
-    &lt;div class=&quot;flink-item-desc&quot; title=&quot;当前博客使用的 Hexo 主题仓库。&quot;&gt;
-      当前博客使用的 Hexo 主题仓库。
+    &lt;div class=&quot;flink-item-name&quot;&gt;n0ne&lt;/div&gt;
+    &lt;div class=&quot;flink-item-desc&quot; title=&quot;web web web！大肘子我教我学外博&quot;&gt;
+      web web web！大肘子我教我学外博
+    &lt;/div&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;flink-list-item&quot;&gt;
+  &lt;a href=&quot;https://tanggantan.github.io/&quot; title=&quot;Tangg&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+    &lt;div class=&quot;flink-item-icon&quot;&gt;
+      &lt;img class=&quot;no-lightbox&quot; src=&quot;https://tanggantan.github.io/img/avatar.jpg&quot; onerror=&quot;this.onerror=null;this.src=&#39;/images/avatar.jpg&#39;&quot; alt=&quot;Tangg&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flink-item-name&quot;&gt;Tangg&lt;/div&gt;
+    &lt;div class=&quot;flink-item-desc&quot; title=&quot;有他在web也是后继有人了&quot;&gt;
+      有他在web也是后继有人了
     &lt;/div&gt;
   &lt;/a&gt;
 &lt;/div&gt;
@@ -308,7 +320,7 @@
 
   <div class="flink-edit-tip">
     <strong>建议：</strong>
-    每个友链卡片尽量包含 1 个头像、1 个博客名、1 句简介，页面看起来会更统一。
+    每个友链卡片尽量带头像、博客名和一句简介，页面会更统一，也更像标准友链页。
   </div>
 
   <div class="flink-code">
