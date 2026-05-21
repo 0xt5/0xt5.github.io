@@ -42,10 +42,6 @@
 
 
 
-
-
-
-
 <link rel="stylesheet" href="/css/main.css" />
 
 <meta name="generator" content="Hexo 8.1.2"></head>
@@ -169,33 +165,80 @@
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
-    <div>
-        <h1>碎碎念</h1>
-    </div>
-    <div class="info">
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2026/5/21
-        </span>
-        
-        
-    </div>
-    
-    <div class="content" v-pre>
-        <h1 id="碎碎念"><a href="#碎碎念" class="headerlink" title="碎碎念"></a>碎碎念</h1><p>这里放一些不成体系的想法、情绪、碎碎念，或者突然想记下来的几句话。</p>
-<p>有时候是今天学了什么，有时候是突然想到的一件事，也可能只是叽里咕噜说几句。</p>
-<p>如果哪天我想把它们整理成正式文章，再慢慢搬去博客正文里。</p>
+    <div class="content">
+        <style>
+        .murmur-wrap {
+          margin: 0 auto;
+          max-width: 860px;
+        }
 
+        .murmur-head {
+          margin-bottom: 22px;
+          padding: 22px 24px;
+          border-radius: 18px;
+          background: linear-gradient(135deg, rgba(102,175,239,.12), rgba(255,162,196,.12));
+          border: 1px solid rgba(102,175,239,.15);
+        }
+
+        .murmur-head h2 {
+          margin: 0 0 10px;
+        }
+
+        .murmur-head p {
+          margin: 0;
+          line-height: 1.8;
+          color: #5c6b72;
+        }
+
+        .murmur-list {
+          display: grid;
+          gap: 14px;
+        }
+
+        .murmur-card {
+          padding: 16px 18px;
+          border-radius: 16px;
+          background: #fff;
+          border: 1px solid #e8edf5;
+          box-shadow: 0 8px 22px rgba(120, 140, 160, 0.10);
+        }
+
+        .murmur-time {
+          margin-bottom: 8px;
+          font-size: 12px;
+          color: #8a97a3;
+        }
+
+        .murmur-text {
+          line-height: 1.9;
+          color: #334;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+        </style>
+
+        <div class="murmur-wrap">
+          <div class="murmur-head">
+            <h2>碎碎念</h2>
+            <p>这里放一些不成体系的想法、情绪、碎碎念，或者突然想记下来的几句话。</p>
+          </div>
+
+          <div class="murmur-list">
+            
+            
+            <div class="murmur-card">
+              <div class="murmur-time">2026-05-22 00:31</div>
+              <div class="murmur-text">它会一条一条显示成小卡片，不会堆成一整篇文章。</div>
+            </div>
+            
+            <div class="murmur-card">
+              <div class="murmur-time">2026-05-22 00:30</div>
+              <div class="murmur-text">这里是碎碎念页面，以后想到什么就随手记什么。</div>
+            </div>
+            
+          </div>
+        </div>
     </div>
-    
-    
-    
-    
-    
-    
-    
 </div>
 
             <footer id="footer">
@@ -226,12 +269,6 @@
         
     </div>
     <script src="/js/particlex-main.js"></script>
-    
-    
-
-
-
-
     
 </body>
 </html>
