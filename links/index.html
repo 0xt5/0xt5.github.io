@@ -185,152 +185,146 @@
     
     <div class="content" v-pre>
         <style>
-.friend-wrap {
-  max-width: 1100px;
+.flink {
   margin: 0 auto;
+  max-width: 1040px;
 }
 
-.friend-hero {
-  padding: 24px 26px;
-  margin-bottom: 24px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(102,175,239,.12), rgba(255,162,196,.12));
-  border: 1px solid rgba(102,175,239,.15);
+.flink h2 {
+  margin: 18px 0 10px;
 }
 
-.friend-grid {
+.flink-desc {
+  margin-bottom: 18px;
+  color: #5c6b72;
+  line-height: 1.8;
+}
+
+.flink-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 18px;
-  margin: 24px 0 30px;
+  margin: 18px 0 30px;
 }
 
-.friend-card {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 18px 18px 16px;
+.flink-list-item {
   border-radius: 18px;
   background: #fff;
-  border: 1px solid #e9eef5;
-  box-shadow: 0 10px 30px rgba(120, 140, 160, .12);
+  border: 1px solid #e8edf5;
+  box-shadow: 0 10px 30px rgba(120, 140, 160, 0.12);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  overflow: hidden;
+}
+
+.flink-list-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 38px rgba(102, 175, 239, 0.18);
+  border-color: rgba(102, 175, 239, 0.4);
+}
+
+.flink-list-item a {
+  display: block;
+  padding: 22px 18px 18px;
+  text-align: center;
   text-decoration: none;
   color: inherit;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
-.friend-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(102,175,239,.18);
-  border-color: rgba(102,175,239,.4);
-}
-
-.friend-avatar {
-  flex: none;
-  width: 56px;
-  height: 56px;
+.flink-item-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 14px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid rgba(102,175,239,.22);
+  border: 3px solid rgba(102, 175, 239, 0.18);
   background: #f5f7fb;
 }
 
-.friend-avatar img {
+.flink-item-icon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.friend-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.friend-name {
-  margin: 2px 0 8px;
+.flink-item-name {
   font-size: 18px;
   font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.friend-desc {
+.flink-item-desc {
+  min-height: 3.6em;
+  line-height: 1.8;
   color: #5c6b72;
-  line-height: 1.7;
-  margin: 0 0 10px;
-  min-height: 3.4em;
+  font-size: 14px;
 }
 
-.friend-url {
-  font-size: 13px;
-  color: #66afef;
-  word-break: break-all;
-}
-
-.friend-tip {
-  margin-top: 26px;
+.flink-edit-tip {
+  margin-top: 30px;
   padding: 16px 18px;
   border-left: 4px solid #66afef;
-  background: rgba(102,175,239,.08);
+  background: rgba(102, 175, 239, 0.08);
   border-radius: 10px;
 }
 
-.friend-template {
-  margin-top: 16px;
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: #fafcff;
-  border: 1px dashed #c7d8ec;
-  overflow-x: auto;
+.flink-code {
+  margin-top: 14px;
 }
 </style>
 
-<div class="friend-wrap">
-  <div class="friend-hero">
-    <h2>友情链接</h2>
-    <p>这里放我常看、常用、或者想推荐给你的博客与网站。</p>
-    <p>下面每一张卡片都可以直接复制修改，以后你要加新的友链，只要改这一页即可。</p>
-  </div>
+<div class="flink">
+  <h2>推荐站点</h2>
+  <div class="flink-desc">这里放我常看、常用，或者想推荐给你的博客与网站。</div>
 
-  <div class="friend-grid">
-    <a class="friend-card" href="https://hexo.io" target="_blank" rel="noopener">
-      <div class="friend-avatar">
-        <img src="/images/avatar.jpg" alt="Hexo" />
-      </div>
-      <div class="friend-body">
-        <div class="friend-name">Hexo</div>
-        <div class="friend-desc">Hexo 官方网站，静态博客框架文档和生态入口。</div>
-        <div class="friend-url">https://hexo.io</div>
-      </div>
-    </a>
+  <div class="flink-list">
+    <div class="flink-list-item">
+      <a href="https://hexo.io" title="Hexo" target="_blank" rel="noopener">
+        <div class="flink-item-icon">
+          <img class="no-lightbox" src="/images/avatar.jpg" alt="Hexo" />
+        </div>
+        <div class="flink-item-name">Hexo</div>
+        <div class="flink-item-desc" title="Hexo 官方网站，静态博客框架文档和生态入口。">
+          Hexo 官方网站，静态博客框架文档和生态入口。
+        </div>
+      </a>
+    </div>
 
-<pre><code>&lt;a class=&quot;friend-card&quot; href=&quot;https://github.com/theme-particlex/hexo-theme-particlex&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
-  &lt;div class=&quot;friend-avatar&quot;&gt;
-    &lt;img src=&quot;/images/avatar.jpg&quot; alt=&quot;ParticleX&quot; /&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;friend-body&quot;&gt;
-    &lt;div class=&quot;friend-name&quot;&gt;ParticleX&lt;/div&gt;
-    &lt;div class=&quot;friend-desc&quot;&gt;当前博客使用的 Hexo 主题仓库。&lt;/div&gt;
-    &lt;div class=&quot;friend-url&quot;&gt;https://github.com/theme-particlex/hexo-theme-particlex&lt;/div&gt;
-  &lt;/div&gt;
-&lt;/a&gt;
+<pre><code>&lt;div class=&quot;flink-list-item&quot;&gt;
+  &lt;a href=&quot;https://github.com/theme-particlex/hexo-theme-particlex&quot; title=&quot;ParticleX&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+    &lt;div class=&quot;flink-item-icon&quot;&gt;
+      &lt;img class=&quot;no-lightbox&quot; src=&quot;/images/custom-particlex-avatar.png&quot; alt=&quot;ParticleX&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flink-item-name&quot;&gt;ParticleX&lt;/div&gt;
+    &lt;div class=&quot;flink-item-desc&quot; title=&quot;当前博客使用的 Hexo 主题仓库。&quot;&gt;
+      当前博客使用的 Hexo 主题仓库。
+    &lt;/div&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
 </code></pre>
   </div>
 
-  <div class="friend-tip">
-    <strong>怎么添加别人的博客：</strong>
-    直接复制一张卡片，把头像、名称、简介和链接替换成你自己的内容即可。
+  <h2>以后怎么添加别人的博客</h2>
+  <div class="flink-desc">继续复制下面这一整块卡片，把头像、名称、简介和链接替换成你自己的内容即可。</div>
+
+  <div class="flink-edit-tip">
+    <strong>建议：</strong>
+    每个友链卡片尽量包含 1 个头像、1 个博客名、1 句简介，页面看起来会更统一。
   </div>
 
-  <div class="friend-template">
-<pre><code class="language-html">&lt;a class="friend-card" href="https://example.com" target="_blank" rel="noopener"&gt;
-  &lt;div class="friend-avatar"&gt;
-    &lt;img src="/images/avatar.jpg" alt="博客名称"&gt;
-  &lt;/div&gt;
-  &lt;div class="friend-body"&gt;
-    &lt;div class="friend-name"&gt;博客名称&lt;/div&gt;
-    &lt;div class="friend-desc"&gt;这里写一句简介，介绍他的博客内容。&lt;/div&gt;
-    &lt;div class="friend-url"&gt;https://example.com&lt;/div&gt;
-  &lt;/div&gt;
-&lt;/a&gt;</code></pre>
+  <div class="flink-code">
+
+<pre><code class="language-html">&lt;div class=&quot;flink-list-item&quot;&gt;
+  &lt;a href=&quot;https://example.com&quot; title=&quot;博客名称&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+    &lt;div class=&quot;flink-item-icon&quot;&gt;
+      &lt;img class=&quot;no-lightbox&quot; src=&quot;/images/avatar.jpg&quot; alt=&quot;博客名称&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flink-item-name&quot;&gt;博客名称&lt;/div&gt;
+    &lt;div class=&quot;flink-item-desc&quot; title=&quot;这里写一句简介&quot;&gt;
+      这里写一句简介
+    &lt;/div&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
   </div>
 </div>
 
