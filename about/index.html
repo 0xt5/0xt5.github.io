@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8" />
-    <title>About | 0xt5 Blog</title>
+    <title>关于 | 0xt5 Blog</title>
     <meta name="author" content="0xt5" />
     <meta name="description" content="Personal blog powered by Hexo and GitHub Pages" />
     <meta name="keywords" content="Hexo,GitHub Pages,Blog" />
@@ -91,6 +91,26 @@
             <span>&ensp;Tags</span>
         </a>
         
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;首页</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;关于</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;分类</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;标签</span>
+        </a>
+        
     </nav>
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
@@ -145,6 +165,42 @@
                     </div>
                 </a>
                 
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">首页</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">关于</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">分类</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">标签</div>
+                    </div>
+                </a>
+                
             </div>
         </transition>
     </nav>
@@ -156,7 +212,7 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
     <div>
-        <h1>About</h1>
+        <h1>关于</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -170,8 +226,8 @@
     </div>
     
     <div class="content" v-pre>
-        <h1 id="About"><a href="#About" class="headerlink" title="About"></a>About</h1><p>This is the personal blog of <strong>0xt5</strong>.</p>
-<p>I use this site to publish notes, experiments, and technical write-ups.</p>
+        <h1 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h1><p>这里是 <strong>0xt5</strong> 的个人博客。</p>
+<p>我会在这里发布学习笔记、实验记录和技术文章。</p>
 
     </div>
     
