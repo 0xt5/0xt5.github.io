@@ -185,117 +185,154 @@
     
     <div class="content" v-pre>
         <style>
-.links-intro {
-  margin: 0 auto 28px;
-  max-width: 860px;
-  padding: 20px 24px;
+.friend-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.friend-hero {
+  padding: 24px 26px;
+  margin-bottom: 24px;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(102, 175, 239, 0.14), rgba(255, 162, 196, 0.14));
-  border: 1px solid rgba(102, 175, 239, 0.16);
-  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(102,175,239,.12), rgba(255,162,196,.12));
+  border: 1px solid rgba(102,175,239,.15);
 }
 
-.links-intro h2 {
-  margin: 0 0 10px;
-}
-
-.links-grid {
+.friend-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 18px;
-  margin: 28px 0;
+  margin: 24px 0 30px;
 }
 
-.link-card {
-  display: block;
-  padding: 20px 22px;
+.friend-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px 18px 16px;
   border-radius: 18px;
   background: #fff;
   border: 1px solid #e9eef5;
-  box-shadow: 0 10px 30px rgba(120, 140, 160, 0.12);
-  color: #334;
+  box-shadow: 0 10px 30px rgba(120, 140, 160, .12);
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
-.link-card:hover {
+.friend-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(102, 175, 239, 0.18);
-  border-color: rgba(102, 175, 239, 0.45);
+  box-shadow: 0 16px 36px rgba(102,175,239,.18);
+  border-color: rgba(102,175,239,.4);
 }
 
-.link-card-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.friend-avatar {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(102,175,239,.22);
+  background: #f5f7fb;
+}
+
+.friend-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friend-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.friend-name {
+  margin: 2px 0 8px;
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 10px;
 }
 
-.link-card-desc {
-  line-height: 1.75;
+.friend-desc {
   color: #5c6b72;
+  line-height: 1.7;
+  margin: 0 0 10px;
+  min-height: 3.4em;
 }
 
-.link-card-url {
-  margin-top: 14px;
+.friend-url {
   font-size: 13px;
   color: #66afef;
   word-break: break-all;
 }
 
-.links-edit-tip {
-  margin-top: 34px;
+.friend-tip {
+  margin-top: 26px;
   padding: 16px 18px;
   border-left: 4px solid #66afef;
-  background: rgba(102, 175, 239, 0.08);
+  background: rgba(102,175,239,.08);
   border-radius: 10px;
+}
+
+.friend-template {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fafcff;
+  border: 1px dashed #c7d8ec;
+  overflow-x: auto;
 }
 </style>
 
-<div class="links-intro">
-  <h2>朋友们的好站点</h2>
-  <p>这里放我常看、常用，或者想推荐给你的博客与网站。</p>
-  <p>如果以后你想新增别人的博客，只需要继续在这个文件里复制下面的卡片块并修改内容即可。</p>
-</div>
+<div class="friend-wrap">
+  <div class="friend-hero">
+    <h2>友情链接</h2>
+    <p>这里放我常看、常用、或者想推荐给你的博客与网站。</p>
+    <p>下面每一张卡片都可以直接复制修改，以后你要加新的友链，只要改这一页即可。</p>
+  </div>
 
-<div class="links-grid">
-  <a class="link-card" href="https://hexo.io" target="_blank" rel="noopener">
-    <div class="link-card-title">
-      <span>Hexo</span>
-      <span>↗</span>
-    </div>
-    <div class="link-card-desc">Hexo 官方网站，静态博客框架文档和生态入口。</div>
-    <div class="link-card-url">https://hexo.io</div>
-  </a>
+  <div class="friend-grid">
+    <a class="friend-card" href="https://hexo.io" target="_blank" rel="noopener">
+      <div class="friend-avatar">
+        <img src="/images/avatar.jpg" alt="Hexo" />
+      </div>
+      <div class="friend-body">
+        <div class="friend-name">Hexo</div>
+        <div class="friend-desc">Hexo 官方网站，静态博客框架文档和生态入口。</div>
+        <div class="friend-url">https://hexo.io</div>
+      </div>
+    </a>
 
-  <a class="link-card" href="https://github.com/theme-particlex/hexo-theme-particlex" target="_blank" rel="noopener">
-    <div class="link-card-title">
-      <span>ParticleX</span>
-      <span>↗</span>
-    </div>
-    <div class="link-card-desc">当前博客使用的 Hexo 主题仓库。</div>
-    <div class="link-card-url">https://github.com/theme-particlex/hexo-theme-particlex</div>
-  </a>
-</div>
-
-<div class="links-edit-tip">
-  <strong>以后怎么添加友情链接：</strong>
-  继续复制上面的
-  <code>&lt;a class="link-card" ...&gt;...&lt;/a&gt;</code>
-  整块内容，改成你自己的博客名称、链接和介绍即可。
-</div>
-
-<h2 id="参考模板"><a href="#参考模板" class="headerlink" title="参考模板"></a>参考模板</h2><pre><code class="language-html">&lt;a class=&quot;link-card&quot; href=&quot;https://example.com&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
-  &lt;div class=&quot;link-card-title&quot;&gt;
-    &lt;span&gt;某某的博客&lt;/span&gt;
-    &lt;span&gt;↗&lt;/span&gt;
+<pre><code>&lt;a class=&quot;friend-card&quot; href=&quot;https://github.com/theme-particlex/hexo-theme-particlex&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+  &lt;div class=&quot;friend-avatar&quot;&gt;
+    &lt;img src=&quot;/images/avatar.jpg&quot; alt=&quot;ParticleX&quot; /&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;link-card-desc&quot;&gt;这里写一句简介，比如专注前端、后端、随笔或安全研究。&lt;/div&gt;
-  &lt;div class=&quot;link-card-url&quot;&gt;https://example.com&lt;/div&gt;
+  &lt;div class=&quot;friend-body&quot;&gt;
+    &lt;div class=&quot;friend-name&quot;&gt;ParticleX&lt;/div&gt;
+    &lt;div class=&quot;friend-desc&quot;&gt;当前博客使用的 Hexo 主题仓库。&lt;/div&gt;
+    &lt;div class=&quot;friend-url&quot;&gt;https://github.com/theme-particlex/hexo-theme-particlex&lt;/div&gt;
+  &lt;/div&gt;
 &lt;/a&gt;
 </code></pre>
+  </div>
+
+  <div class="friend-tip">
+    <strong>怎么添加别人的博客：</strong>
+    直接复制一张卡片，把头像、名称、简介和链接替换成你自己的内容即可。
+  </div>
+
+  <div class="friend-template">
+<pre><code class="language-html">&lt;a class="friend-card" href="https://example.com" target="_blank" rel="noopener"&gt;
+  &lt;div class="friend-avatar"&gt;
+    &lt;img src="/images/avatar.jpg" alt="博客名称"&gt;
+  &lt;/div&gt;
+  &lt;div class="friend-body"&gt;
+    &lt;div class="friend-name"&gt;博客名称&lt;/div&gt;
+    &lt;div class="friend-desc"&gt;这里写一句简介，介绍他的博客内容。&lt;/div&gt;
+    &lt;div class="friend-url"&gt;https://example.com&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/a&gt;</code></pre>
+  </div>
+</div>
 
     </div>
     
