@@ -166,54 +166,106 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             
 <div id="archives">
-    
-    <div id="timeline-wrap" ref="timeline">
-        
-        <div class="timeline" data-title="博客已初始化">
-            <div class="timeline-tail"></div>
-            <div class="timeline-content">
-                <div class="item-time">2026/5/21</div>
-                <a href="/2026/05/21/hello-world/">
-                    <h3>博客已初始化</h3>
-                </a>
-                <div class="info">
-                    
-                    <span class="category">
-                        <a href="/categories/%E5%BB%BA%E7%AB%99/">
-                            <span class="icon">
-                                <i class="fa-solid fa-bookmark fa-fw"></i>
-                            </span>
-                            建站
-                        </a>
-                    </span>
-                    
-                    
-                    <span class="tags">
-                        <span class="icon">
-                            <i class="fa-solid fa-tags fa-fw"></i>
-                        </span>
-                        
-                        
-                        <span class="tag">
-                            
-                            <a href="/tags/Hexo/" style="color: #00a596">
-                                Hexo
-                            </a>
-                        </span>
-                        
-                        <span class="tag">
-                            
-                            <a href="/tags/GitHub-Pages/" style="color: #ffa2c4">
-                                GitHub Pages
-                            </a>
-                        </span>
-                        
-                    </span>
-                    
-                </div>
-            </div>
-        </div>
-        
+    <style>
+    .archive-browser {
+        display: grid;
+        gap: 16px;
+    }
+
+    .archive-folder {
+        position: relative;
+        border-left: 3px solid rgba(102, 175, 239, 0.18);
+        padding-left: 18px;
+    }
+
+    .archive-folder::before {
+        content: "";
+        position: absolute;
+        left: -6px;
+        top: 20px;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #00a596;
+        box-shadow: 0 0 0 4px rgba(0, 165, 150, 0.10);
+    }
+
+    .archive-folder-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0 12px;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .archive-folder-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .archive-folder-icon {
+        color: #00a596;
+        font-size: 18px;
+    }
+
+    .archive-folder-name {
+        flex: 1;
+    }
+
+    .archive-folder-count {
+        font-size: 12px;
+        color: #8a97a3;
+    }
+
+    .archive-folder-children {
+        margin-left: 14px;
+        display: grid;
+        gap: 12px;
+    }
+
+    .archive-folder-posts {
+        display: grid;
+        gap: 10px;
+        margin: 0 0 16px 6px;
+    }
+
+    .archive-post-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid #e8edf5;
+        box-shadow: 0 8px 22px rgba(120, 140, 160, 0.10);
+        text-decoration: none;
+        color: inherit;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .archive-post-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 12px 28px rgba(120, 140, 160, 0.14);
+    }
+
+    .archive-post-title {
+        font-size: 20px;
+        color: #2f3d4b;
+    }
+
+    .archive-post-date {
+        flex-shrink: 0;
+        font-size: 12px;
+        color: #8a97a3;
+    }
+    </style>
+
+    <div class="archive-browser">
+        <details class="archive-folder" open><summary class="archive-folder-summary"><span class="archive-folder-icon"><i class="fa-solid fa-folder"></i></span><span class="archive-folder-name">建站</span><span class="archive-folder-count">1</span></summary><div class="archive-folder-posts"><a class="archive-post-row" href="/2026/05/21/hello-world/"><span class="archive-post-title">博客已初始化</span><span class="archive-post-date">2026/5/21</span></a></div></details>
     </div>
 </div>
 
