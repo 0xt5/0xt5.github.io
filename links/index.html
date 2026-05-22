@@ -165,25 +165,133 @@
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
-    <div>
-        <h1>友情链接</h1>
+    <div class="content">
+        <style>
+        .flink {
+          margin: 0 auto;
+          max-width: 980px;
+        }
+
+        .flink h2 {
+          margin: 16px 0 8px;
+        }
+
+        .flink-date {
+          margin-bottom: 10px;
+          font-size: 13px;
+          color: #8a97a3;
+        }
+
+        .flink-desc {
+          margin-bottom: 14px;
+          color: #5c6b72;
+          line-height: 1.75;
+        }
+
+        .flink-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+          gap: 14px;
+          margin: 14px 0 26px;
+        }
+
+        .flink-list-item {
+          border-radius: 16px;
+          background: #fff;
+          border: 1px solid #e8edf5;
+          box-shadow: 0 8px 22px rgba(120, 140, 160, 0.1);
+          transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+          overflow: hidden;
+        }
+
+        .flink-list-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 14px 28px rgba(102, 175, 239, 0.16);
+          border-color: rgba(102, 175, 239, 0.34);
+        }
+
+        .flink-list-item a {
+          display: block;
+          padding: 16px 14px 14px;
+          text-align: center;
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .flink-item-icon {
+          width: 58px;
+          height: 58px;
+          margin: 0 auto 12px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid rgba(102, 175, 239, 0.18);
+          background: #f5f7fb;
+        }
+
+        .flink-item-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .flink-item-name {
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+
+        .flink-item-desc {
+          min-height: 3.2em;
+          line-height: 1.6;
+          color: #5c6b72;
+          font-size: 13px;
+        }
+        </style>
+
+        <div class="flink">
+          <h2>申友们的博客</h2>
+          <div class="flink-date">2026/5/21</div>
+          <div class="flink-desc">必须狠狠地挂申啊，太厉害啦！</div>
+
+          <div class="flink-list">
+            <div class="flink-list-item">
+              <a href="https://enp00.github.io/" title="enp0" target="_blank" rel="noopener">
+                <div class="flink-item-icon">
+                  <img class="no-lightbox" src="https://enp00.github.io/img/touxiang-320.webp" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="enp0" />
+                </div>
+                <div class="flink-item-name">enp0</div>
+                <div class="flink-item-desc" title="pwn大肘子啊，很好的师傅，orz了">
+                  pwn大肘子啊，很好的师傅，orz了
+                </div>
+              </a>
+            </div>
+
+            <div class="flink-list-item">
+              <a href="https://n0neme.top/" title="n0ne" target="_blank" rel="noopener">
+                <div class="flink-item-icon">
+                  <img class="no-lightbox" src="https://n0neme.top/images/123.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="n0ne" />
+                </div>
+                <div class="flink-item-name">n0ne</div>
+                <div class="flink-item-desc" title="web web web！大肘子我教我学外博">
+                  web web web！大肘子我教我学外博
+                </div>
+              </a>
+            </div>
+
+            <div class="flink-list-item">
+              <a href="https://tanggantan.github.io/" title="Tangg" target="_blank" rel="noopener">
+                <div class="flink-item-icon">
+                  <img class="no-lightbox" src="https://tanggantan.github.io/img/avatar.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="Tangg" />
+                </div>
+                <div class="flink-item-name">Tangg</div>
+                <div class="flink-item-desc" title="有他在web也是后继有人了">
+                  有他在web也是后继有人了
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
     </div>
-    <div class="info">
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2026/5/21
-        </span>
-        
-        
-    </div>
-    
-    <div class="content" v-pre>
-        
-    </div>
-    
-    
 </div>
 
             <footer id="footer">
