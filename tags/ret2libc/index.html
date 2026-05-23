@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8" />
-    <title>碎碎念 | 0xt5 Blog</title>
+    <title>标签: ret2libc | 0xt5 Blog</title>
     <meta name="author" content="0xt5" />
     <meta name="description" content="一个基于 Hexo 和 GitHub Pages 的个人博客" />
     <meta name="keywords" content="Hexo,GitHub Pages,Blog" />
@@ -164,109 +164,96 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            
-<div class="article">
-    <div class="content">
-        <style>
-        .murmur-wrap {
-          margin: 0 auto;
-          max-width: 860px;
-        }
-
-        .murmur-head {
-          margin-bottom: 22px;
-          padding: 24px 26px;
-          border-radius: 20px;
-          background: linear-gradient(135deg, rgba(102,175,239,.12), rgba(255,162,196,.12));
-          border: 1px solid rgba(102,175,239,.15);
-        }
-
-        .murmur-head h2 {
-          margin: 0 0 10px;
-        }
-
-        .murmur-head p {
-          margin: 0;
-          line-height: 1.8;
-          color: #5c6b72;
-        }
-
-        .murmur-year {
-          margin-top: 28px;
-        }
-
-        .murmur-year-title {
-          margin: 0 0 14px;
-          font-size: 28px;
-          line-height: 1.2;
-        }
-
-        .murmur-month {
-          margin-bottom: 24px;
-        }
-
-        .murmur-month-title {
-          margin: 0 0 14px;
-          font-size: 18px;
-          color: #4f6070;
-        }
-
-        .murmur-list {
-          display: grid;
-          gap: 14px;
-        }
-
-        .murmur-card {
-          padding: 16px 18px;
-          border-radius: 16px;
-          background: #fff;
-          border: 1px solid #e8edf5;
-          box-shadow: 0 8px 22px rgba(120, 140, 160, 0.10);
-        }
-
-        .murmur-time {
-          margin-bottom: 8px;
-          font-size: 12px;
-          color: #8a97a3;
-        }
-
-        .murmur-text {
-          line-height: 1.9;
-          color: #334;
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-
-        </style>
-
-        <div class="murmur-wrap">
-            <div class="murmur-head">
-              <h2>碎碎念</h2>
-              <p>这里放一些不成体系的想法、情绪、碎碎念，或者突然想记下来的几句话。</p>
+            <div id="archives">
+    
+    <div class="categories-tags">
+        
+        <span>
+            <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="bg">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                基础题
+            </a>
+        </span>
+        
+        
+        <span>
+            <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="bg">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                ret2libc
+            </a>
+        </span>
+        
+        
+        
+        
+        <span>
+            <a href="/tags/Hexo/" data-tag-name="Hexo" data-tag-color-role="bg">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                Hexo
+            </a>
+        </span>
+        
+        
+        <span>
+            <a href="/tags/GitHub-Pages/" data-tag-name="GitHub Pages" data-tag-color-role="bg">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                GitHub Pages
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <div class="timeline">
+        <div class="timeline-tail"></div>
+        <div class="timeline-content">
+            <div class="item-time">2026/5/23</div>
+            <a href="/2026/05/23/litctf-2026-ret2libc/">
+                <h3>LitCTF 2026 - ret2libc</h3>
+            </a>
+            <div class="info">
+                
+                <span class="category">
+                    <a href="/categories/CTF/">
+                        <span class="icon">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </span>
+                        CTF
+                    </a>
+                </span>
+                
+                
+                <span class="tags">
+                    <span class="icon">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </span>
+                    
+                    <span class="tag">
+                        <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
+                            基础题
+                        </a>
+                    </span>
+                    
+                    <span class="tag">
+                        <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
+                            ret2libc
+                        </a>
+                    </span>
+                    
+                </span>
+                
             </div>
-
-            
-
-            
-            <section class="murmur-year" id="murmur-year-2026">
-              <h2 class="murmur-year-title">2026</h2>
-              
-              <section class="murmur-month" id="murmur-2026-5">
-                <h3 class="murmur-month-title">5月</h3>
-                <div class="murmur-list">
-                  
-                  <div class="murmur-card">
-                    <div class="murmur-time">5-21</div>
-                    <div class="murmur-text">也是把博客搭建好了，ai真好用，我要狠狠的学pwn！</div>
-                  </div>
-                  
-                </div>
-              </section>
-              
-            </section>
-            
         </div>
     </div>
+    
 </div>
 
             <footer id="footer">

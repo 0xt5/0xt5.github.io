@@ -72,7 +72,7 @@
             <span>&ensp;碎碎念</span>
         </a>
         
-        <a href="/archives">
+        <a href="/categories">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;归档</span>
         </a>
@@ -119,7 +119,7 @@
                     </div>
                 </a>
                 
-                <a href="/archives">
+                <a href="/categories">
                     <div class="item">
                         <div style="min-width: 20px; max-width: 50px; width: 10%">
                             <i class="fa-solid fa-box-archive fa-fw"></i>
@@ -164,8 +164,7 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            
-<div class="article">
+            <div class="article">
     <div>
         <h1>博客已初始化</h1>
     </div>
@@ -193,13 +192,13 @@
             </span>
             
             <span class="tag">
-                <a href="/tags/Hexo/" style="color: #ff7d73">
+                <a href="/tags/Hexo/" data-tag-name="Hexo" data-tag-color-role="text">
                     Hexo
                 </a>
             </span>
             
             <span class="tag">
-                <a href="/tags/GitHub-Pages/" style="color: #03a9f4">
+                <a href="/tags/GitHub-Pages/" data-tag-name="GitHub Pages" data-tag-color-role="text">
                     GitHub Pages
                 </a>
             </span>
