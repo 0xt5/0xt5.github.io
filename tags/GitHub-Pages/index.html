@@ -164,176 +164,82 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            
-<div id="archives">
-    <style>
-    .tag-toolbar {
-        position: sticky;
-        top: 18px;
-        z-index: 8;
-        margin-bottom: 22px;
-        padding: 14px 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: 0 10px 26px rgba(120, 140, 160, 0.10);
-        backdrop-filter: blur(10px);
-    }
-
-    .tag-toolbar-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .tag-toolbar-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        color: #fff;
-        text-decoration: none;
-        transition: transform .18s ease, opacity .18s ease;
-    }
-
-    .tag-toolbar-item:hover {
-        transform: translateY(-2px);
-        opacity: .92;
-    }
-
-    .tag-toolbar-item.active {
-        box-shadow: 0 8px 20px rgba(120, 140, 160, 0.18);
-    }
-
-    .tag-post-list {
-        display: grid;
-        gap: 16px;
-    }
-
-    .tag-post-card {
-        padding: 18px 20px;
-        border-radius: 18px;
-        background: #fff;
-        border: 1px solid #e8edf5;
-        box-shadow: 0 10px 24px rgba(120, 140, 160, 0.10);
-    }
-
-    .tag-post-time {
-        margin-bottom: 8px;
-        font-size: 12px;
-        color: #8a97a3;
-    }
-
-    .tag-post-card h3 {
-        margin: 0 0 10px;
-        font-size: 22px;
-    }
-
-    .tag-post-card h3 a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .tag-post-summary {
-        line-height: 1.8;
-        color: #4f6070;
-    }
-
-    .tag-post-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 12px;
-        font-size: 13px;
-    }
-
-    .tag-post-meta a {
-        text-decoration: none;
-    }
-    </style>
-
-    <div class="tag-toolbar">
-        <div class="tag-toolbar-list">
-            <a
-                class="tag-toolbar-item "
-                href="/tags"
-                style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)"
-            >
-                <i class="fa-solid fa-layer-group fa-fw"></i>
-                <span>全部</span>
+            <div id="archives">
+    
+    <div class="categories-tags">
+        
+        
+        
+        <span>
+            <a href="/tags/Hexo/" style="background: #ff7d73">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                Hexo
             </a>
-            
-            
-            
-            <a
-                class="tag-toolbar-item "
-                href="/tags/Hexo/"
-                style="background: #ff7d73"
-            >
-                <i class="fa-solid fa-tags fa-fw"></i>
-                <span>Hexo</span>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/GitHub-Pages/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                GitHub Pages
             </a>
-            
-            
-            <a
-                class="tag-toolbar-item active"
-                href="/tags/GitHub-Pages/"
-                style="background: #03a9f4"
-            >
-                <i class="fa-solid fa-tags fa-fw"></i>
-                <span>GitHub Pages</span>
-            </a>
-            
-        </div>
+        </span>
+        
+        
+        
+        
     </div>
-
-    <div class="tag-post-list">
-        
-        
-        <article class="tag-post-card">
-            <div class="tag-post-time">2026/5/21</div>
-            <h3><a href="/2026/05/21/hello-world/">博客已初始化</a></h3>
-            <div class="tag-post-summary">
-                这是博客的第一篇文章，用来确认站点已经搭建完成并可以正常发布。
-目前已经完成
-Hexo 本地环境已经配置好
-GitHub Pages 部署已经打通
-当前博客主题为 ParticleX
-首页、导航、友情链接、邮箱复制等基础功能都已可用
-
-接下来可以做什么
-继续写你自己的第一篇正式文...
-            </div>
-            <div class="tag-post-meta">
+    
+    <div class="timeline">
+        <div class="timeline-tail"></div>
+        <div class="timeline-content">
+            <div class="item-time">2026/5/21</div>
+            <a href="/2026/05/21/hello-world/">
+                <h3>博客已初始化</h3>
+            </a>
+            <div class="info">
                 
                 <span class="category">
                     <a href="/categories/%E5%BB%BA%E7%AB%99/">
-                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                        <span class="icon">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </span>
                         建站
                     </a>
                 </span>
                 
                 
                 <span class="tags">
-                    <i class="fa-solid fa-tags fa-fw"></i>
+                    <span class="icon">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </span>
                     
                     
+                    <span class="tag">
+                        
+                        <a href="/tags/Hexo/" style="color: #ffa2c4">
+                            Hexo
+                        </a>
+                    </span>
                     
-                    <a href="/tags/Hexo/" style="color: #00a596">
-                        Hexo
-                    </a>
-                    
-                    
-                    <a href="/tags/GitHub-Pages/" style="color: #ff7d73">
-                        GitHub Pages
-                    </a>
+                    <span class="tag">
+                        
+                        <a href="/tags/GitHub-Pages/" style="color: #00bcd4">
+                            GitHub Pages
+                        </a>
+                    </span>
                     
                 </span>
                 
             </div>
-        </article>
-        
+        </div>
     </div>
+    
 </div>
 
             <footer id="footer">
