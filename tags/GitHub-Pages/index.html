@@ -46,6 +46,21 @@
 
 <meta name="generator" content="Hexo 8.1.2"></head>
 <body>
+    <script>
+        (() => {
+            const storageKey = "particlex-color-theme";
+            const root = document.documentElement;
+            const getPreferredTheme = () => {
+                const saved = localStorage.getItem(storageKey);
+                if (saved === "light" || saved === "dark") return saved;
+                return window.matchMedia &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
+            };
+            root.setAttribute("data-theme", getPreferredTheme());
+        })();
+    </script>
     <div
         id="tab-title-config"
         data-enable="1"
@@ -102,12 +117,49 @@
             <span>&ensp;友情链接</span>
         </a>
         
+        <a href="/game/">
+            <i class="fa-solid fa-face-laugh-squint fa-fw"></i>
+            <span>&ensp;game！</span>
+        </a>
+        
+        <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            :aria-label="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :title="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :data-mode="isDarkTheme ? 'dark' : 'light'"
+            @click="toggleColorTheme"
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-thumb">
+                    <i class="fa-solid fa-sun theme-icon theme-icon-sun"></i>
+                    <i class="fa-solid fa-moon theme-icon theme-icon-moon"></i>
+                </span>
+            </span>
+        </button>
     </nav>
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
             <i class="fa-solid fa-bars fa-fw"></i>
             <span>&emsp;0XT5 BLOG</span>
         </div>
+        <button
+            id="theme-toggle-mobile"
+            class="theme-toggle theme-toggle-mobile"
+            type="button"
+            :aria-label="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :title="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :data-mode="isDarkTheme ? 'dark' : 'light'"
+            @click.stop="toggleColorTheme"
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-thumb">
+                    <i class="fa-solid fa-sun theme-icon theme-icon-sun"></i>
+                    <i class="fa-solid fa-moon theme-icon theme-icon-moon"></i>
+                </span>
+            </span>
+        </button>
         <transition name="slide">
             <div class="items" v-show="showMenuItems">
                 
@@ -162,6 +214,15 @@
                             <i class="fa-solid fa-link fa-fw"></i>
                         </div>
                         <div style="min-width: 100px; max-width: 150%; width: 20%">友情链接</div>
+                    </div>
+                </a>
+                
+                <a href="/game/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-face-laugh-squint fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">game！</div>
                     </div>
                 </a>
                 

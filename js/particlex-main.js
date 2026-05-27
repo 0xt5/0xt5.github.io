@@ -5,6 +5,7 @@ const app = Vue.createApp({
             loading: true,
             hiddenMenu: false,
             showMenuItems: false,
+            colorTheme: "light",
             menuColor: false,
             scrollTop: 0,
             renderers: [],
@@ -19,6 +20,7 @@ const app = Vue.createApp({
         });
     },
     mounted() {
+        this.initColorTheme();
         window.addEventListener("scroll", this.handleScroll, true);
         this.render();
         this.bindCopyEmail();
@@ -28,6 +30,45 @@ const app = Vue.createApp({
         this.initHomeOrbit();
     },
     methods: {
+        initColorTheme() {
+            const root = document.documentElement;
+            const saved = localStorage.getItem("particlex-color-theme");
+            const preferred =
+                saved === "light" || saved === "dark"
+                    ? saved
+                    : window.matchMedia &&
+                        window.matchMedia("(prefers-color-scheme: dark)").matches
+                      ? "dark"
+                      : "light";
+            this.colorTheme = preferred;
+            root.setAttribute("data-theme", preferred);
+
+            if (!window.__particlexThemeMediaBound && window.matchMedia) {
+                const media = window.matchMedia("(prefers-color-scheme: dark)");
+                const syncSystemTheme = (event) => {
+                    if (localStorage.getItem("particlex-color-theme")) return;
+                    const nextTheme = event.matches ? "dark" : "light";
+                    document.documentElement.setAttribute("data-theme", nextTheme);
+                    if (window.__particlexVueApp) {
+                        window.__particlexVueApp.colorTheme = nextTheme;
+                    }
+                    window.__particlexCommentThemeSync?.();
+                };
+                if (media.addEventListener) {
+                    media.addEventListener("change", syncSystemTheme);
+                } else if (media.addListener) {
+                    media.addListener(syncSystemTheme);
+                }
+                window.__particlexThemeMediaBound = true;
+            }
+        },
+        toggleColorTheme() {
+            const nextTheme = this.isDarkTheme ? "light" : "dark";
+            this.colorTheme = nextTheme;
+            document.documentElement.setAttribute("data-theme", nextTheme);
+            localStorage.setItem("particlex-color-theme", nextTheme);
+            window.__particlexCommentThemeSync?.();
+        },
         render() {
             for (let i of this.renderers) i();
         },
@@ -690,5 +731,11 @@ const app = Vue.createApp({
             this.scrollTop = newScrollTop;
         },
     },
+    computed: {
+        isDarkTheme() {
+            return this.colorTheme === "dark";
+        },
+    },
 });
-app.mount("#layout");
+const vm = app.mount("#layout");
+window.__particlexVueApp = vm;
