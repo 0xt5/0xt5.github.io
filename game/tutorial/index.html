@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>游戏の教程</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-a: #07111f;
+            --bg-b: #102842;
+            --card: rgba(9, 22, 40, 0.76);
+            --card-strong: rgba(12, 28, 50, 0.88);
+            --line: rgba(142, 220, 255, 0.26);
+            --text: #edf9ff;
+            --muted: rgba(222, 242, 255, 0.72);
+            --cyan: #8de9ff;
+            --blue: #79b7ff;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 18% 12%, rgba(95, 215, 255, 0.2), transparent 28%),
+                radial-gradient(circle at 85% 8%, rgba(120, 144, 255, 0.18), transparent 30%),
+                linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 100%);
+            color: var(--text);
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        body::before {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            background-size: 42px 42px;
+            content: "";
+            inset: 0;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 92%);
+            pointer-events: none;
+            position: fixed;
+        }
+
+        .tutorial-panel {
+            margin: 0 auto;
+            max-width: 1180px;
+            padding: 38px 24px 64px;
+            position: relative;
+            width: 100%;
+        }
+
+        .back-link {
+            background: rgba(12, 22, 40, 0.72);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--cyan);
+            display: inline-block;
+            font-weight: 800;
+            margin-bottom: 30px;
+            padding: 11px 16px;
+            text-decoration: none;
+            transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+        }
+
+        .back-link:hover {
+            border-color: rgba(141, 233, 255, 0.58);
+            box-shadow: 0 0 24px rgba(99, 201, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            background:
+                linear-gradient(135deg, rgba(16, 42, 72, 0.84), rgba(8, 17, 31, 0.78)),
+                radial-gradient(circle at 20% 25%, rgba(141, 233, 255, 0.18), transparent 36%);
+            border: 1px solid var(--line);
+            border-radius: 32px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+            padding: clamp(28px, 5vw, 48px);
+            position: relative;
+        }
+
+        .hero::after {
+            background: linear-gradient(90deg, transparent, rgba(141, 233, 255, 0.28), transparent);
+            content: "";
+            height: 1px;
+            left: 8%;
+            position: absolute;
+            top: 0;
+            width: 84%;
+        }
+
+        .tutorial-kicker {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(34px, 6vw, 66px);
+            line-height: 1;
+            margin: 0 0 14px;
+            text-shadow: 0 0 22px rgba(80, 184, 255, 0.28);
+        }
+
+        .lead {
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.9;
+            margin: 0;
+            max-width: 58em;
+        }
+
+        .tutorial-content {
+            display: grid;
+            gap: 24px;
+            margin-top: 28px;
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            box-shadow: 0 20px 64px rgba(0, 0, 0, 0.22);
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .section-card h2,
+        .section-card h3 {
+            color: #f6fdff;
+            margin: 0 0 12px;
+        }
+
+        .section-card h2 {
+            font-size: clamp(24px, 4vw, 38px);
+        }
+
+        .section-card h3 {
+            color: var(--cyan);
+            font-size: clamp(20px, 3vw, 28px);
+        }
+
+        .section-card p {
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.9;
+            margin: 0 0 16px;
+        }
+
+        .section-card a {
+            color: #9fe8ff;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .step {
+            background: var(--card-strong);
+            border: 1px solid rgba(142, 220, 255, 0.2);
+            border-radius: 24px;
+            margin-top: 18px;
+            overflow: hidden;
+        }
+
+        .step-text {
+            padding: 20px 22px 8px;
+        }
+
+        .step img {
+            display: block;
+            max-height: 620px;
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .ending {
+            align-items: center;
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+        }
+
+        .ending strong {
+            color: #ffffff;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, rgba(141, 233, 255, 0.18), rgba(121, 183, 255, 0.12));
+            border: 1px solid rgba(141, 233, 255, 0.34);
+            border-radius: 999px;
+            color: var(--cyan);
+            flex: 0 0 auto;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 10px 14px;
+        }
+
+        @media (max-width: 720px) {
+            .tutorial-panel {
+                padding: 22px 14px 40px;
+            }
+
+            .ending {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="tutorial-panel">
+        <a class="back-link" href="/game/">返回游戏选择页</a>
+
+        <section class="hero">
+            <div class="tutorial-kicker">0xt5 Game Hub</div>
+            <h1>游戏の教程</h1>
+            <p class="lead">这里放的是游戏项目的使用教程，不会进入博客文章列表。</p>
+        </section>
+
+        <section class="tutorial-content">
+            <article class="section-card">
+                <h2>项目一</h2>
+                <h3>手势特效切换器</h3>
+                <p>这个项目参考了抖音博主 <a href="https://www.douyin.com/user/MS4wLjABAAAAAlWrJIkMNq22jA7xgIB1kpVEl3CeLjMfKj865lvmVlI" target="_blank" rel="noopener">不冷冰的抖音</a>，然后我在他的基础上进行了细微的修改。</p>
+                <p>基础教程：需要打开笔记本的相机，然后按照下面的手势切换和触发效果。</p>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>在 Mode 1 中，五指张开：触发粒子生成。</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528135433491.png" alt="Mode 1 五指张开触发粒子生成" />
+                </div>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>双手食指靠近并保持：切换模式。</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528135718980.png" alt="双手食指靠近切换模式" />
+                </div>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>切换到 Mode 2：取景器之后，取景器里面是彩色的，其他区域是黑白的。</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528135834327.png" alt="Mode 2 取景器效果" />
+                </div>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>切换到 Mode 3：3D 牵引之后，可以伸出手掌生成小球。</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528135954779.png" alt="Mode 3 手掌生成小球" />
+                </div>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>然后可以用食指进行牵引。</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528140103266.png" alt="Mode 3 食指牵引粒子" />
+                </div>
+
+                <div class="step">
+                    <div class="step-text">
+                        <p>螺旋丸！</p>
+                    </div>
+                    <img src="/game/tutorial/images/image-20260528145436993.png" alt="螺旋丸效果" />
+                </div>
+            </article>
+
+            <article class="section-card ending">
+                <p>然后这个教程就到此 <strong>结束啦</strong>。望各位玩的开心，٩( 'ω' )و 谢谢各位来玩！</p>
+                <span class="badge">Have fun</span>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

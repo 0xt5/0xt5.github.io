@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>关于我的小小博客</title>
+    <url>/2026/05/21/hello-world/</url>
+    <content><![CDATA[<p>这是博客的第一篇测试文章，用来确认站点已经搭建完成并可以正常发布。</p>
+<h2 id="关于这里"><a href="#关于这里" class="headerlink" title="关于这里"></a>关于这里</h2><p>我会在这里写一些小小东西。</p>
+<p>可能是碎碎念</p>
+<p>或者关于其他好玩的东西</p>
+<p>嗯对</p>
+<p>我不休息我还能学    ⊂(‘ω’⊂ )))Σ≡&#x3D;─༄༅༄༅༄༅༄༅༄༅</p>
+<p>好好加油</p>
+<p>嗯对</p>
+<p>哒哒 哒哒哒 好想玩……</p>
+<p>哒哒 哒哒哒……</p>
+<p>已严肃写博客</p>
+<p><img src="/images/hello-world-image-20260526230611369.png" alt="image-20260526230611369"></p>
+]]></content>
+      <categories>
+        <category>建站</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LitCTF 2026 - ret2libc</title>
     <url>/2026/05/23/litctf-2026-ret2libc/</url>
     <content><![CDATA[<p><a href="https://platform.cyclens.tech/api/upload/55d197e2-f1dd-47be-8439-6086bd58868d">题目地址</a></p>
@@ -79,30 +103,6 @@ io.interactive()
       <tags>
         <tag>基础题</tag>
         <tag>ret2libc</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于我的小小博客</title>
-    <url>/2026/05/21/hello-world/</url>
-    <content><![CDATA[<p>这是博客的第一篇测试文章，用来确认站点已经搭建完成并可以正常发布。</p>
-<h2 id="关于这里"><a href="#关于这里" class="headerlink" title="关于这里"></a>关于这里</h2><p>我会在这里写一些小小东西。</p>
-<p>可能是碎碎念</p>
-<p>或者关于其他好玩的东西</p>
-<p>嗯对</p>
-<p>我不休息我还能学    ⊂(‘ω’⊂ )))Σ≡&#x3D;─༄༅༄༅༄༅༄༅༄༅</p>
-<p>好好加油</p>
-<p>嗯对</p>
-<p>哒哒 哒哒哒 好想玩……</p>
-<p>哒哒 哒哒哒……</p>
-<p>已严肃写博客</p>
-<p><img src="/images/hello-world-image-20260526230611369.png" alt="image-20260526230611369"></p>
-]]></content>
-      <categories>
-        <category>建站</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
       </tags>
   </entry>
 </search>

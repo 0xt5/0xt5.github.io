@@ -321,10 +321,11 @@
         }
 
         class ParticleMode extends BaseMode {
-            constructor(canvas, ctx) {
+            constructor(canvas, ctx, shape) {
                 super(canvas, ctx);
+                this.shape = shape;
                 this.particles = [];
-                this.fireworkCooldown = 0;
+                this.fireworkCooldown = {};
                 this.zezeTimer = 0;
             }
 
@@ -340,26 +341,64 @@
                     isFirework: false,
                     life: 1
                 }));
-                this.fireworkCooldown = 0;
+                this.fireworkCooldown = {};
                 this.zezeTimer = 0;
             }
 
-            heartBurst(cx, cy) {
-                if (this.fireworkCooldown > 0) return;
-                this.fireworkCooldown = 40;
+            shapePoints() {
+                if (this.shape === "heart") {
+                    return Array.from({ length: 80 }, (_, index) => {
+                        const t = (index / 80) * Math.PI * 2;
 
-                const baseHue = Math.random() * 60 + 330;
+                        return {
+                            x: 16 * Math.pow(Math.sin(t), 3),
+                            y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))
+                        };
+                    });
+                }
+
+                const starPoints = Array.from({ length: 10 }, (_, index) => {
+                    const angle = -Math.PI / 2 + index * Math.PI / 5;
+                    const radius = index % 2 === 0 ? 28 : 12;
+
+                    return {
+                        x: Math.cos(angle) * radius,
+                        y: Math.sin(angle) * radius
+                    };
+                });
+
+                return Array.from({ length: 80 }, (_, index) => {
+                    const edgeProgress = (index / 80) * starPoints.length;
+                    const edgeIndex = Math.floor(edgeProgress) % starPoints.length;
+                    const nextIndex = (edgeIndex + 1) % starPoints.length;
+                    const localProgress = edgeProgress - Math.floor(edgeProgress);
+                    const start = starPoints[edgeIndex];
+                    const end = starPoints[nextIndex];
+
+                    return {
+                        x: start.x + (end.x - start.x) * localProgress,
+                        y: start.y + (end.y - start.y) * localProgress
+                    };
+                });
+            }
+
+            shapeBurst(cx, cy, handIndex) {
+                if (this.fireworkCooldown[handIndex] > 0) return;
+                this.fireworkCooldown[handIndex] = 40;
+
+                const points = this.shapePoints();
+                const baseHue = this.shape === "heart"
+                    ? Math.random() * 60 + 330
+                    : Math.random() * 38 + 38;
 
                 for (let i = 0; i < 80; i++) {
-                    const t = (i / 80) * Math.PI * 2;
-                    const hx = 16 * Math.pow(Math.sin(t), 3);
-                    const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                    const point = points[i];
 
                     this.particles.push({
                         x: cx,
                         y: cy,
-                        vx: hx * 1.5 + (Math.random() - 0.5) * 4,
-                        vy: hy * 1.5 + (Math.random() - 0.5) * 4,
+                        vx: point.x * 1.25 + (Math.random() - 0.5) * 4,
+                        vy: point.y * 1.25 + (Math.random() - 0.5) * 4,
                         size: Math.random() * 5 + 2,
                         hue: baseHue + (Math.random() - 0.5) * 30,
                         isFirework: true,
@@ -373,7 +412,11 @@
                 const width = this.canvas.width;
                 const height = this.canvas.height;
 
-                if (this.fireworkCooldown > 0) this.fireworkCooldown--;
+                Object.keys(this.fireworkCooldown).forEach((handIndex) => {
+                    if (this.fireworkCooldown[handIndex] > 0) {
+                        this.fireworkCooldown[handIndex]--;
+                    }
+                });
 
                 ctx.drawImage(video, 0, 0, width, height);
                 ctx.fillStyle = "rgba(0,0,0,0.01)";
@@ -388,10 +431,10 @@
                         this.zezeTimer = 70;
                     }
 
-                    multiHandLandmarks.forEach((hand) => {
+                    multiHandLandmarks.forEach((hand, handIndex) => {
                         if (fingersUp(hand) >= 4) {
                             const pos = palmPos(hand, width, height);
-                            this.heartBurst(pos.x, pos.y);
+                            this.shapeBurst(pos.x, pos.y, handIndex);
                         }
                     });
                 }
@@ -471,8 +514,9 @@
         }
 
         class ViewfinderMode extends BaseMode {
-            constructor(canvas, ctx) {
+            constructor(canvas, ctx, filter) {
                 super(canvas, ctx);
+                this.filter = filter;
                 this.motionValue = 0;
             }
 
@@ -482,7 +526,7 @@
                 const height = this.canvas.height;
 
                 ctx.save();
-                ctx.filter = "grayscale(100%)";
+                ctx.filter = this.filter;
                 ctx.drawImage(video, 0, 0, width, height);
                 ctx.restore();
 
@@ -511,7 +555,9 @@
                     ctx.beginPath();
                     ctx.rect(minX, minY, rectWidth, rectHeight);
                     ctx.clip();
-                    ctx.filter = "none";
+                    ctx.filter = this.filter === "invert(100%) contrast(140%) saturate(130%)"
+                        ? "contrast(125%) saturate(130%)"
+                        : "none";
                     ctx.drawImage(video, 0, 0, width, height);
                     ctx.lineWidth = 2 + this.motionValue * 6;
                     ctx.strokeStyle = `rgba(0,255,150,${0.5 + this.motionValue * 0.5})`;
@@ -522,19 +568,30 @@
         }
 
         class TetherMode extends BaseMode {
-            constructor(canvas, ctx) {
+            constructor(canvas, ctx, variant) {
                 super(canvas, ctx);
+                this.variant = variant;
                 this.particles = [];
                 this.focal = 500;
-                this.maxParticles = 300;
+                this.maxParticles = this.isRasenganVariant() ? 560 : 300;
                 this.spawnCooldown = {};
                 this.prevPalmPos = {};
+                this.rasenganSpawnTick = 0;
             }
 
             init() {
                 this.particles = [];
                 this.spawnCooldown = {};
                 this.prevPalmPos = {};
+                this.rasenganSpawnTick = 0;
+            }
+
+            isRasenganVariant() {
+                return this.variant === "rasengan" || this.variant === "finger-rasengan";
+            }
+
+            isFingerRasengan() {
+                return this.variant === "finger-rasengan";
             }
 
             isIndexOnly(hand) {
@@ -570,7 +627,9 @@
                         ay: 0,
                         az: 0,
                         size: Math.random() * 4 + 1,
-                        hue: Math.random() * 360
+                        hue: Math.random() * 360,
+                        swirlSeed: Math.random() * Math.PI * 2,
+                        swirlDir: Math.random() > 0.5 ? 1 : -1
                     });
                 }
             }
@@ -589,25 +648,47 @@
                 if (multiHandLandmarks) {
                     multiHandLandmarks.forEach((hand, handIndex) => {
                         const palm = palmPos(hand, width, height);
+                        const indexTip = {
+                            x: hand[8].x * width - width / 2,
+                            y: hand[8].y * height - height / 2,
+                            z: 0
+                        };
+                        const openHand = fingersUp(hand) >= 4;
+                        const indexOnly = this.isIndexOnly(hand);
 
-                        if (this.isIndexOnly(hand)) {
+                        const attractByPalm = this.variant === "rasengan" && openHand;
+                        const attractByFinger = (this.variant !== "rasengan" && indexOnly);
+
+                        if (attractByPalm || attractByFinger) {
                             indexTips.push({
-                                x: hand[8].x * width - width / 2,
-                                y: hand[8].y * height - height / 2
+                                x: attractByPalm ? palm.x - width / 2 : indexTip.x,
+                                y: attractByPalm ? palm.y - height / 2 : indexTip.y,
+                                z: 0
                             });
                         }
 
-                        if (fingersUp(hand) >= 4) {
+                        const spawnByFinger = this.variant === "rasengan" && indexOnly;
+                        const spawnByPalm = this.variant !== "rasengan" && openHand;
+
+                        if (spawnByFinger || spawnByPalm) {
                             const now = Date.now();
                             if (!this.spawnCooldown[handIndex] || now - this.spawnCooldown[handIndex] > 500) {
                                 this.spawnCooldown[handIndex] = now;
 
-                                const wx = palm.x - width / 2;
-                                const wy = palm.y - height / 2;
+                                const attractX = palm.x - width / 2;
+                                const attractY = palm.y - height / 2;
+                                const wx = this.variant === "rasengan" ? indexTip.x : attractX;
+                                const wy = this.variant === "rasengan" ? indexTip.y : attractY;
                                 const prev = this.prevPalmPos[handIndex];
-                                let impulse = { x: 0, y: 0, z: 0 };
+                                let impulse = this.isRasenganVariant()
+                                    ? {
+                                        x: ((attractByPalm ? palm.x - width / 2 : indexTip.x) - wx) * 0.025,
+                                        y: ((attractByPalm ? palm.y - height / 2 : indexTip.y) - wy) * 0.025,
+                                        z: 0
+                                    }
+                                    : { x: 0, y: 0, z: 0 };
 
-                                if (prev) {
+                                if (prev && !this.isRasenganVariant()) {
                                     impulse = {
                                         x: (wx - prev.x) * 0.12,
                                         y: (wy - prev.y) * 0.12,
@@ -629,6 +710,17 @@
                 this.particles.sort((a, b) => b.z - a.z);
 
                 const canAttract = indexTips.length > 0;
+                this.rasenganSpawnTick = (this.rasenganSpawnTick + 1) % 2;
+
+                if (this.variant === "rasengan" && canAttract && this.rasenganSpawnTick === 0) {
+                    indexTips.forEach((tip) => {
+                        this.spawnAt(tip.x, tip.y, 9, {
+                            x: (Math.random() - 0.5) * 1.5,
+                            y: (Math.random() - 0.5) * 1.5,
+                            z: (Math.random() - 0.5) * 0.8
+                        });
+                    });
+                }
 
                 this.particles.forEach((particle) => {
                     particle.ax = 0;
@@ -641,26 +733,58 @@
                             const dy = tip.y - particle.y;
                             const dz = -particle.z;
                             const dist = Math.hypot(dx, dy, dz);
+                            const range = this.isFingerRasengan() ? 260 : this.variant === "rasengan" ? 430 : 320;
 
-                            if (dist < 320 && dist > 0) {
-                                const force = ((320 - dist) / 320) * 0.95;
+                            if (dist < range && dist > 0) {
+                                const closeness = (range - dist) / range;
+                                const force = closeness * (this.isFingerRasengan() ? 1.52 : this.variant === "rasengan" ? 1.16 : 0.95);
+                                const noise = Math.sin(
+                                    particle.swirlSeed +
+                                    particle.x * 0.021 +
+                                    particle.y * 0.017 +
+                                    Date.now() * 0.011
+                                );
+                                const orbitScale = this.isFingerRasengan() ? 0.38 + noise * 0.14 : this.variant === "rasengan" ? 0.74 : 0.12;
+                                const orbitForce = closeness * orbitScale * (this.isFingerRasengan() ? particle.swirlDir : 1);
+                                const tangentX = -dy / dist;
+                                const tangentY = dx / dist;
+                                const scatterForce = this.isFingerRasengan() ? closeness * (0.06 + Math.abs(noise) * 0.08) : 0;
+                                const brokenRadial = this.isFingerRasengan()
+                                    ? Math.sin(particle.swirlSeed * 2.7 + Date.now() * 0.018 + dist * 0.027) * closeness * 0.05
+                                    : 0;
+
                                 particle.ax += dx / dist * force;
                                 particle.ay += dy / dist * force;
                                 particle.az += dz / dist * force;
+                                particle.ax += tangentX * orbitForce;
+                                particle.ay += tangentY * orbitForce;
+                                particle.ax += -dx / dist * (scatterForce + brokenRadial);
+                                particle.ay += -dy / dist * (scatterForce - brokenRadial);
+                                particle.az += Math.sin((particle.x + particle.y + Date.now() * 0.08) * 0.02)
+                                    * (this.isFingerRasengan() ? 0.07 : this.variant === "rasengan" ? 0.18 : 0.035);
                             }
                         });
 
-                        particle.ax += Math.sin((particle.y + particle.z) * 0.01) * 0.015;
-                        particle.ay += Math.cos((particle.x + particle.z) * 0.01) * 0.015;
+                        particle.ax += Math.sin((particle.y + particle.z + Date.now() * 0.12) * 0.01)
+                            * (this.isFingerRasengan() ? 0.025 : this.variant === "rasengan" ? 0.04 : 0.02);
+                        particle.ay += Math.cos((particle.x + particle.z - Date.now() * 0.09) * 0.01)
+                            * (this.isFingerRasengan() ? 0.025 : this.variant === "rasengan" ? 0.04 : 0.02);
                     }
 
                     particle.vx += particle.ax;
                     particle.vy += particle.ay;
                     particle.vz += particle.az;
 
-                    particle.vx *= 0.94;
-                    particle.vy *= 0.94;
-                    particle.vz *= 0.94;
+                    const damping = this.isRasenganVariant() ? 0.965 : 0.955;
+                    particle.vx *= damping;
+                    particle.vy *= damping;
+                    particle.vz *= damping;
+
+                    const prev = {
+                        x: particle.x,
+                        y: particle.y,
+                        z: particle.z
+                    };
 
                     particle.x += particle.vx;
                     particle.y += particle.vy;
@@ -685,12 +809,31 @@
                         particle.z = Math.max(Math.min(particle.z, limitZ), -limitZ);
                     }
 
-                    particle.hue = (particle.hue + 1) % 360;
+                    particle.hue = this.isRasenganVariant()
+                        ? (190 + Math.sin(Date.now() * 0.006 + particle.x * 0.01) * 38 + 360) % 360
+                        : (particle.hue + 1) % 360;
 
                     const projected = this.project(particle.x, particle.y, particle.z);
                     const speed = Math.hypot(particle.vx, particle.vy, particle.vz);
                     const brightness = Math.min(55 + speed * 10, 95);
                     const alpha = Math.min(projected.scale * 1.5, 1);
+
+                    if (this.isRasenganVariant()) {
+                        const prevProjected = this.project(prev.x, prev.y, prev.z);
+                        const trailAlpha = Math.min(alpha * 0.82, 0.9);
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(prevProjected.sx, prevProjected.sy);
+                        ctx.lineTo(projected.sx, projected.sy);
+                        ctx.lineWidth = Math.max(particle.size * projected.scale * 1.8, 1.4);
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = `hsla(${particle.hue},100%,${Math.min(brightness + 8, 98)}%,${trailAlpha})`;
+                        ctx.shadowColor = `hsla(${particle.hue},100%,70%,0.7)`;
+                        ctx.shadowBlur = 12;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
 
                     ctx.beginPath();
                     ctx.arc(projected.sx, projected.sy, Math.max(particle.size * projected.scale, 0.5), 0, Math.PI * 2);
@@ -701,25 +844,16 @@
                 indexTips.forEach((tip) => {
                     const tipProjected = this.project(tip.x, tip.y, 0);
 
-                    ctx.save();
-                    ctx.shadowColor = "rgba(150,220,255,0.95)";
-                    ctx.shadowBlur = 30;
-                    ctx.beginPath();
-                    ctx.arc(tipProjected.sx, tipProjected.sy, 10, 0, Math.PI * 2);
-                    ctx.fillStyle = "rgba(220,245,255,1)";
-                    ctx.fill();
-                    ctx.restore();
-
                     this.particles.forEach((particle) => {
                         const dist2D = Math.hypot(tip.x - particle.x, tip.y - particle.y);
                         if (dist2D < 250) {
                             const projected = this.project(particle.x, particle.y, particle.z);
-                            const alpha = (1 - dist2D / 250) * 0.7;
+                            const alpha = (1 - dist2D / 250) * (this.isRasenganVariant() ? 0.22 : 0.7);
                             ctx.beginPath();
                             ctx.moveTo(tipProjected.sx, tipProjected.sy);
                             ctx.lineTo(projected.sx, projected.sy);
                             ctx.strokeStyle = `rgba(150,220,255,${alpha})`;
-                            ctx.lineWidth = alpha * 2;
+                            ctx.lineWidth = this.isRasenganVariant() ? Math.max(alpha * 1.35, 0.2) : alpha * 2;
                             ctx.stroke();
                         }
                     });
@@ -743,7 +877,15 @@
                 this.isCrossing = false;
                 this.crossStartTime = 0;
                 this.crossThreshold = 1500;
-                this.modeNames = ["Mode 1：粒子特效", "Mode 2：取景器", "Mode 3：3D 牵引"];
+                this.modeNames = [
+                    "Mode 1：粒子特效-五角星",
+                    "Mode 1：粒子特效-爱心",
+                    "Mode 2：取景器-黑白",
+                    "Mode 2：取景器-反差色",
+                    "Mode 3：3D 牵引-普通版本",
+                    "Mode 3：3D 牵引-手指螺旋丸",
+                    "Mode 3：3D 牵引-螺旋丸"
+                ];
             }
 
             register(mode) {
@@ -830,7 +972,10 @@
             startButton.disabled = true;
             setStatus("正在加载手势识别组件并请求相机权限...", "");
 
-            if (typeof window.Camera === "undefined" || typeof window.Hands === "undefined") {
+            if (
+                typeof window.Camera === "undefined" ||
+                typeof window.Hands === "undefined"
+            ) {
                 setStatus("外部依赖加载失败。当前页面需要访问 jsDelivr，如果网络受限，这里会启动不了。", "error");
                 startButton.disabled = false;
                 appStarted = false;
@@ -842,9 +987,13 @@
 
                 const controller = new MainController(canvasElement, canvasCtx, videoElement);
                 controller
-                    .register(new ParticleMode(canvasElement, canvasCtx))
-                    .register(new ViewfinderMode(canvasElement, canvasCtx))
-                    .register(new TetherMode(canvasElement, canvasCtx))
+                    .register(new ParticleMode(canvasElement, canvasCtx, "star"))
+                    .register(new ParticleMode(canvasElement, canvasCtx, "heart"))
+                    .register(new ViewfinderMode(canvasElement, canvasCtx, "grayscale(100%)"))
+                    .register(new ViewfinderMode(canvasElement, canvasCtx, "invert(100%) contrast(140%) saturate(130%)"))
+                    .register(new TetherMode(canvasElement, canvasCtx, "normal"))
+                    .register(new TetherMode(canvasElement, canvasCtx, "finger-rasengan"))
+                    .register(new TetherMode(canvasElement, canvasCtx, "rasengan"))
                     .start();
 
                 const hands = new Hands({
