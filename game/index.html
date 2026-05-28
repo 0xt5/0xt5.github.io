@@ -40,15 +40,60 @@
         .game-shell {
             margin: 0 auto;
             max-width: 1240px;
-            padding: 38px 26px 56px;
+            padding: 24px 26px 56px;
         }
 
-        .game-topbar {
+        .game-nav {
             align-items: center;
             display: flex;
-            gap: 14px;
+            gap: 18px;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 34px;
+        }
+
+        .game-brand,
+        .game-nav-links a {
+            align-items: center;
+            color: #e8f7ff;
+            display: inline-flex;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .game-brand {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .game-nav-links {
+            align-items: center;
+            background: rgba(8, 18, 34, 0.56);
+            border: 1px solid rgba(129, 210, 255, 0.22);
+            border-radius: 999px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: flex-end;
+            padding: 7px;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        .game-nav-links a {
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 8px 11px;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .game-nav-links a:hover,
+        .game-nav-links a.active {
+            background: rgba(141, 233, 255, 0.16);
+            color: #9fe8ff;
+            transform: translateY(-1px);
         }
 
         .game-back {
@@ -138,6 +183,15 @@
             background: linear-gradient(to top, rgba(8, 16, 30, 0.35), transparent 40%);
         }
 
+        .game-card-cover {
+            display: block;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            width: 100%;
+            z-index: 1;
+        }
+
         .game-card-badge {
             background: rgba(255, 255, 255, 0.88);
             border-radius: 999px;
@@ -168,11 +222,23 @@
             margin: 0 0 14px;
         }
 
+        .game-card-info p a {
+            color: #9ff0ff;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .game-card-info p a:hover {
+            text-decoration: underline;
+        }
+
         .game-card-action {
             color: #98ecff;
+            display: inline-block;
             font-size: 13px;
             font-weight: 800;
             letter-spacing: 0.08em;
+            text-decoration: none;
             text-transform: uppercase;
         }
 
@@ -275,6 +341,17 @@
                 padding: 24px 16px 40px;
             }
 
+            .game-nav {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .game-nav-links {
+                border-radius: 22px;
+                justify-content: flex-start;
+                width: 100%;
+            }
+
             .game-grid {
                 grid-template-columns: 1fr;
             }
@@ -287,9 +364,18 @@
 </head>
 <body>
     <main class="game-shell">
-        <div class="game-topbar">
-            <a class="game-back" href="/">返回博客</a>
-        </div>
+        <nav class="game-nav" aria-label="博客导航">
+            <a class="game-brand" href="/">0xt5 Blog</a>
+            <div class="game-nav-links">
+                <a href="/">首页</a>
+                <a href="/about/">碎碎念</a>
+                <a href="/categories/">归档</a>
+                <a href="/comment/">留言板</a>
+                <a href="/tags/">标签</a>
+                <a href="/links/">友情链接</a>
+                <a class="active" href="/game/">game！</a>
+            </div>
+        </nav>
 
         <section class="game-title-wrap">
             <div class="game-kicker">0xt5 Game Hub</div>
@@ -298,29 +384,22 @@
         </section>
 
         <section class="game-grid">
-            <a class="game-card game-card-guide" href="/game/tutorial/">
-                <div class="game-card-media">
+            <article class="game-card game-card-guide">
+                <a class="game-card-media" href="/game/tutorial/" aria-label="打开游戏前置教程">
                     <div class="game-card-badge">Guide</div>
-                    <div class="coming-soon">教程</div>
-                </div>
+                    <img class="game-card-cover" src="/game/assets/tutorial-cover.png" alt="游戏前置教程封面" />
+                </a>
                 <div class="game-card-info">
-                    <h3>游戏の教程</h3>
-                    <p>这里会放我做的游戏教程，内容还没上传。</p>
-                    <div class="game-card-action">Open Guide</div>
+                    <h3>游戏前置教程(✪ω✪)</h3>
+                    <p>玩不懂的可以看一下这里，实在玩不懂的在 <a href="/comment/">留言板</a> 留言就好啦(σﾟ∀ﾟ)σ..</p>
+                    <a class="game-card-action" href="/game/tutorial/">Open Guide</a>
                 </div>
-            </a>
+            </article>
 
             <a class="game-card game-card-active" href="/game/hand-project/index.html">
                 <div class="game-card-media">
                     <div class="game-card-badge">AI</div>
-                    <div class="game-card-hand">
-                        <div class="game-card-hand-palm"></div>
-                        <div class="game-card-hand-finger finger-1"></div>
-                        <div class="game-card-hand-finger finger-2"></div>
-                        <div class="game-card-hand-finger finger-3"></div>
-                        <div class="game-card-hand-finger finger-4"></div>
-                        <div class="game-card-hand-finger finger-5"></div>
-                    </div>
+                    <img class="game-card-cover" src="/game/assets/hand-project-cover.png" alt="手势特效切换器封面" />
                 </div>
                 <div class="game-card-info">
                     <h3>手势特效切换器</h3>

@@ -47,9 +47,62 @@
         .tutorial-panel {
             margin: 0 auto;
             max-width: 1180px;
-            padding: 38px 24px 64px;
+            padding: 24px 24px 64px;
             position: relative;
             width: 100%;
+        }
+
+        .game-nav {
+            align-items: center;
+            display: flex;
+            gap: 18px;
+            justify-content: space-between;
+            margin-bottom: 34px;
+        }
+
+        .game-brand,
+        .game-nav-links a {
+            align-items: center;
+            color: #e8f7ff;
+            display: inline-flex;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .game-brand {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .game-nav-links {
+            align-items: center;
+            background: rgba(8, 18, 34, 0.56);
+            border: 1px solid rgba(129, 210, 255, 0.22);
+            border-radius: 999px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: flex-end;
+            padding: 7px;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        .game-nav-links a {
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 8px 11px;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .game-nav-links a:hover,
+        .game-nav-links a.active {
+            background: rgba(141, 233, 255, 0.16);
+            color: #9fe8ff;
+            transform: translateY(-1px);
         }
 
         .back-link {
@@ -205,6 +258,17 @@
                 padding: 22px 14px 40px;
             }
 
+            .game-nav {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .game-nav-links {
+                border-radius: 22px;
+                justify-content: flex-start;
+                width: 100%;
+            }
+
             .ending {
                 align-items: flex-start;
                 flex-direction: column;
@@ -214,6 +278,19 @@
 </head>
 <body>
     <main class="tutorial-panel">
+        <nav class="game-nav" aria-label="博客导航">
+            <a class="game-brand" href="/">0xt5 Blog</a>
+            <div class="game-nav-links">
+                <a href="/">首页</a>
+                <a href="/about/">碎碎念</a>
+                <a href="/categories/">归档</a>
+                <a href="/comment/">留言板</a>
+                <a href="/tags/">标签</a>
+                <a href="/links/">友情链接</a>
+                <a class="active" href="/game/">game！</a>
+            </div>
+        </nav>
+
         <a class="back-link" href="/game/">返回游戏选择页</a>
 
         <section class="hero">
