@@ -911,6 +911,20 @@ body::-webkit-scrollbar-track {
     backdrop-filter: blur(18px);
     animation: link-card-breathe 3.4s ease-in-out infinite;
 }
+.article .content a.link-card::after {
+    background: radial-gradient(circle, rgba(113, 203, 255, 0.2), transparent 62%);
+    border-radius: 999px;
+    bottom: -32px;
+    content: "";
+    height: 86px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    right: -24px;
+    transform: scale(0.72);
+    transition: opacity 0.32s ease, transform 0.32s ease;
+    width: 86px;
+}
 .article .content a.link-card::before {
     background: linear-gradient(
         108deg,
@@ -942,6 +956,10 @@ body::-webkit-scrollbar-track {
     animation: link-card-scan 0.78s ease-out 1;
     opacity: 1;
 }
+.article .content a.link-card:hover::after {
+    opacity: 1;
+    transform: scale(1);
+}
 .article .content .link-card-avatar-shell {
     align-items: center;
     background: linear-gradient(135deg, #f3f8ff 0%, #dbe8ff 100%);
@@ -967,26 +985,33 @@ body::-webkit-scrollbar-track {
 .article .content .link-card-body {
     min-width: 0;
     width: 100%;
+    z-index: 1;
 }
 .article .content .link-card-body h3 {
     color: #22313a;
     font-size: 19px;
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     transition: color 0.28s ease;
 }
 .article .content .link-card-details {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(221, 239, 255, 0.38));
+    border: 1px solid rgba(151, 202, 255, 0.18);
+    border-radius: 14px;
     margin-top: 0;
-    max-height: 0;
-    opacity: 0;
+    max-height: 38px;
+    opacity: 0.58;
     overflow: hidden;
-    transform: translateY(10px);
-    transition: max-height 0.32s ease, opacity 0.24s ease, transform 0.28s ease;
+    padding: 6px 9px;
+    transform: translateX(-8px) scale(0.98);
+    transition: background 0.32s ease, border-color 0.32s ease, max-height 0.34s ease, opacity 0.26s ease, transform 0.3s ease;
 }
 .article .content .link-card-details p {
-    color: #5d6d7f;
+    color: #738194;
     font-size: 13px;
     line-height: 1.65;
     margin: 0;
+    opacity: 0.78;
+    transform: translateY(0);
     transition: color 0.28s ease;
 }
 .article .content a.link-card:hover .link-card-avatar-shell {
@@ -997,12 +1022,15 @@ body::-webkit-scrollbar-track {
     color: #1c5fb8;
 }
 .article .content a.link-card:hover .link-card-details {
-    max-height: 60px;
+    background: linear-gradient(135deg, rgba(235, 247, 255, 0.92), rgba(210, 233, 255, 0.74));
+    border-color: rgba(104, 180, 255, 0.36);
+    max-height: 86px;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0) scale(1);
 }
 .article .content a.link-card:hover .link-card-details p {
-    color: #465a72;
+    color: #35526f;
+    opacity: 1;
 }
 ::-webkit-scrollbar {
     height: 12px;
@@ -1368,8 +1396,9 @@ ol li {
         font-size: 18px;
     }
     .article .content .link-card-details {
-        max-height: 54px;
+        max-height: 86px;
         opacity: 1;
+        padding: 6px 9px;
         transform: none;
     }
     #home-head #home-info {
