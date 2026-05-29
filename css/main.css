@@ -990,29 +990,30 @@ body::-webkit-scrollbar-track {
 .article .content .link-card-body h3 {
     color: #22313a;
     font-size: 19px;
-    margin: 0 0 10px;
+    margin: 0 0 8px;
     transition: color 0.28s ease;
 }
 .article .content .link-card-details {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(221, 239, 255, 0.38));
-    border: 1px solid rgba(151, 202, 255, 0.18);
-    border-radius: 14px;
-    margin-top: 0;
-    max-height: 38px;
-    opacity: 0.58;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    max-height: 48px;
+    max-width: 100%;
+    opacity: 0.08;
     overflow: hidden;
-    padding: 6px 9px;
-    transform: translateX(-8px) scale(0.98);
-    transition: background 0.32s ease, border-color 0.32s ease, max-height 0.34s ease, opacity 0.26s ease, transform 0.3s ease;
+    padding: 0;
+    pointer-events: none;
+    position: static;
+    transform: translateY(4px);
+    transition: opacity 0.34s ease, transform 0.34s ease;
 }
 .article .content .link-card-details p {
-    color: #738194;
+    color: #5d6d7f;
     font-size: 13px;
     line-height: 1.65;
     margin: 0;
-    opacity: 0.78;
-    transform: translateY(0);
-    transition: color 0.28s ease;
+    white-space: normal;
 }
 .article .content a.link-card:hover .link-card-avatar-shell {
     box-shadow: inset 0 1px 0 #fff, 0 16px 28px #aec8ee73;
@@ -1022,15 +1023,11 @@ body::-webkit-scrollbar-track {
     color: #1c5fb8;
 }
 .article .content a.link-card:hover .link-card-details {
-    background: linear-gradient(135deg, rgba(235, 247, 255, 0.92), rgba(210, 233, 255, 0.74));
-    border-color: rgba(104, 180, 255, 0.36);
-    max-height: 86px;
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateY(0);
 }
 .article .content a.link-card:hover .link-card-details p {
-    color: #35526f;
-    opacity: 1;
+    color: #465a72;
 }
 ::-webkit-scrollbar {
     height: 12px;
@@ -1396,10 +1393,14 @@ ol li {
         font-size: 18px;
     }
     .article .content .link-card-details {
-        max-height: 86px;
+        margin-top: 8px;
+        max-height: none;
         opacity: 1;
-        padding: 6px 9px;
         transform: none;
+    }
+    .article .content .link-card-details p {
+        color: #35526f;
+        white-space: normal;
     }
     #home-head #home-info {
         height: 390px;

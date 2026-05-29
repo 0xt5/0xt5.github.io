@@ -35,12 +35,19 @@
         }
 
         .input_video {
-            display: none;
+            height: 1px;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            width: 1px;
         }
 
         .output_canvas {
             display: block;
             height: 100vh;
+            height: 100dvh;
             inset: 0;
             object-fit: cover;
             position: fixed;
@@ -269,11 +276,15 @@
         }
 
         function resizeCanvas() {
-            canvasElement.width = window.innerWidth;
-            canvasElement.height = window.innerHeight;
+            const viewport = window.visualViewport || window;
+            canvasElement.width = Math.round(viewport.width || window.innerWidth);
+            canvasElement.height = Math.round(viewport.height || window.innerHeight);
         }
 
         window.addEventListener("resize", resizeCanvas);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", resizeCanvas);
+        }
         resizeCanvas();
 
         function fingersUp(hand) {
@@ -1017,12 +1028,13 @@
                     controller.drawHUD();
                 });
 
+                const isMobileViewport = Math.min(window.innerWidth, window.innerHeight) <= 720;
                 const camera = new Camera(videoElement, {
                     onFrame: async () => {
                         await hands.send({ image: videoElement });
                     },
-                    width: 1280,
-                    height: 720
+                    width: isMobileViewport ? 640 : 1280,
+                    height: isMobileViewport ? 480 : 720
                 });
 
                 await camera.start();
