@@ -1,0 +1,2108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediaPipe 隔空写字</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --panel: rgba(13, 18, 27, 0.78);
+      --panel-strong: rgba(18, 25, 38, 0.92);
+      --line: rgba(255, 255, 255, 0.16);
+      --line-strong: rgba(255, 255, 255, 0.32);
+      --text: #f7fbff;
+      --muted: #a6b4c4;
+      --cyan: #69e5ff;
+      --lime: #a3ff7a;
+      --rose: #ff6d9d;
+      --amber: #ffd35a;
+      --blue: #7a9cff;
+      --danger: #ff765f;
+      --shadow: 0 24px 90px rgba(0, 0, 0, 0.46);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      min-width: 320px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(105, 229, 255, 0.16), transparent 34%),
+        radial-gradient(circle at 83% 72%, rgba(255, 109, 157, 0.12), transparent 36%),
+        linear-gradient(135deg, #06080d, #111722 48%, #080a10);
+    }
+
+    #camera {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      opacity: 0.52;
+      filter: saturate(0.92) contrast(1.05);
+    }
+
+    .video-shade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(4, 6, 11, 0.68), rgba(4, 6, 11, 0.06) 34%, rgba(4, 6, 11, 0.18) 68%, rgba(4, 6, 11, 0.66)),
+        linear-gradient(180deg, rgba(5, 7, 12, 0.48), transparent 30%, rgba(5, 7, 12, 0.72));
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #drawCanvas {
+      z-index: 2;
+    }
+
+    #fxCanvas {
+      z-index: 3;
+    }
+
+    #guideCanvas {
+      z-index: 4;
+    }
+
+    .topbar {
+      position: absolute;
+      z-index: 8;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      pointer-events: none;
+    }
+
+    .brand,
+    .meters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(8, 12, 20, 0.58);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      max-width: 620px;
+    }
+
+    .mark {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(105, 229, 255, 0.52);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(105, 229, 255, 0.22), rgba(122, 156, 255, 0.12)),
+        rgba(255, 255, 255, 0.04);
+    }
+
+    .mark::before,
+    .mark::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 16px rgba(105, 229, 255, 0.72);
+    }
+
+    .mark::before {
+      width: 11px;
+      height: 3px;
+      left: 7px;
+      top: 7px;
+      transform: rotate(-28deg);
+    }
+
+    .mark::after {
+      width: 3px;
+      height: 11px;
+      right: 7px;
+      bottom: 7px;
+      background: var(--rose);
+      box-shadow: 0 0 16px rgba(255, 109, 157, 0.72);
+      transform: rotate(28deg);
+    }
+
+    .brand-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: baseline;
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 780;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .brand-title span {
+      min-width: 0;
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .meters {
+      justify-self: end;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .meter {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+      line-height: 1;
+      color: #d8e6f5;
+      white-space: nowrap;
+    }
+
+    .clear-icon {
+      position: relative;
+      width: 14px;
+      height: 14px;
+      flex: 0 0 auto;
+    }
+
+    .clear-icon::before,
+    .clear-icon::after {
+      content: "";
+      position: absolute;
+      left: 1px;
+      top: 6px;
+      width: 12px;
+      height: 2px;
+      border-radius: 99px;
+      background: currentColor;
+    }
+
+    .clear-icon::before {
+      transform: rotate(45deg);
+    }
+
+    .clear-icon::after {
+      transform: rotate(-45deg);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      background: var(--cyan);
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .dot.warn {
+      background: var(--amber);
+    }
+
+    .dot.ready {
+      background: var(--lime);
+    }
+
+    .dot.busy {
+      background: var(--rose);
+    }
+
+    .color-pill {
+      width: 15px;
+      height: 15px;
+      border-radius: 99px;
+      border: 2px solid rgba(255, 255, 255, 0.84);
+      background: var(--active-color, #69e5ff);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--active-color, #69e5ff), transparent 20%);
+    }
+
+    .panel {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      top: 50%;
+      width: min(680px, calc(100vw - 36px));
+      max-height: min(78vh, 680px);
+      padding: 18px;
+      transform: translate(-50%, -48%) scale(0.96);
+      opacity: 0;
+      visibility: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(21, 31, 48, 0.92), rgba(12, 16, 25, 0.88)),
+        rgba(9, 12, 18, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(26px);
+      transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+      pointer-events: none;
+    }
+
+    .panel.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .panel-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .panel-close {
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+      min-height: 30px;
+      padding: 0;
+      color: #dbe7f6;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 560;
+    }
+
+    .panel h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .panel .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      padding: 6px 9px;
+      border: 1px solid rgba(105, 229, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(105, 229, 255, 0.08);
+      color: #d9f8ff;
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding-top: 16px;
+    }
+
+    .section {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .section.wide {
+      grid-column: 1 / -1;
+    }
+
+    .section h2 {
+      margin: 0 0 12px;
+      color: #cbd8e7;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 760;
+    }
+
+    .tool-row,
+    .preset-row,
+    .color-row,
+    .size-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tool-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .preset-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .color-row {
+      grid-template-columns: repeat(6, minmax(40px, 1fr));
+    }
+
+    .size-row {
+      grid-template-columns: repeat(5, minmax(48px, 1fr));
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .selectable {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #f5f9ff;
+      cursor: default;
+      overflow: hidden;
+      transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .selectable::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: calc(var(--hover-progress, 0) * 100%);
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--rose));
+      opacity: 0;
+      transition: width 80ms linear, opacity 120ms ease;
+    }
+
+    .selectable.hovering {
+      border-color: rgba(105, 229, 255, 0.78);
+      background: rgba(105, 229, 255, 0.13);
+      transform: translateY(-1px);
+    }
+
+    .selectable.hovering::after {
+      opacity: 1;
+    }
+
+    .selectable.active {
+      border-color: rgba(163, 255, 122, 0.72);
+      background: rgba(163, 255, 122, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(163, 255, 122, 0.18);
+    }
+
+    .tool-icon {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+    }
+
+    .tool-icon.pen::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 3px;
+      width: 6px;
+      height: 18px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #fff, var(--cyan));
+      transform: rotate(36deg);
+      box-shadow: 7px 9px 0 -3px rgba(255, 255, 255, 0.86);
+    }
+
+    .tool-icon.eraser::before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 7px;
+      width: 19px;
+      height: 11px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, var(--rose), #ffd4e0);
+      transform: rotate(-26deg);
+    }
+
+    .swatch {
+      min-height: 46px;
+    }
+
+    .swatch span {
+      width: 28px;
+      height: 28px;
+      border-radius: 99px;
+      border: 2px solid rgba(255, 255, 255, 0.84);
+      background: var(--swatch);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--swatch), transparent 28%);
+    }
+
+    .size-dot {
+      display: block;
+      width: var(--size-dot);
+      height: var(--size-dot);
+      border-radius: 99px;
+      background: #f5fbff;
+      box-shadow: 0 0 18px rgba(245, 251, 255, 0.35);
+    }
+
+    .preset-card {
+      flex-direction: column;
+      gap: 7px;
+      padding: 9px 8px;
+    }
+
+    .preset-card span:last-child {
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .preset-preview {
+      position: relative;
+      width: 38px;
+      height: 20px;
+      flex: 0 0 auto;
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .preset-preview,
+    .preset-preview * {
+      pointer-events: none;
+    }
+
+    .preset-preview::before,
+    .preset-preview::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      border: 2px solid currentColor;
+      opacity: 0.92;
+    }
+
+    .preset-preview.hexagram {
+      width: 34px;
+      height: 24px;
+    }
+
+    .preset-preview.hexagram::before,
+    .preset-preview.hexagram::after {
+      inset: auto;
+      left: 4px;
+      width: 0;
+      height: 0;
+      border-radius: 0;
+      background: transparent;
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+    }
+
+    .preset-preview.hexagram::before {
+      top: 0;
+      border-top: 0;
+      border-bottom: 22px solid currentColor;
+    }
+
+    .preset-preview.hexagram::after {
+      bottom: 0;
+      border-bottom: 0;
+      border-top: 22px solid currentColor;
+    }
+
+    .preset-preview.star::before,
+    .preset-preview.star::after {
+      inset: auto;
+      left: 18px;
+      top: 1px;
+      width: 2px;
+      height: 18px;
+      border: 0;
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    .preset-preview.star::after {
+      transform: rotate(90deg);
+    }
+
+    .preset-preview.star {
+      transform: rotate(24deg);
+    }
+
+    .preset-preview.star i,
+    .preset-preview.heart i {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    .preset-preview.star i::before,
+    .preset-preview.star i::after,
+    .preset-preview.heart::before,
+    .preset-preview.heart::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .preset-preview.star i::before {
+      left: 18px;
+      top: 1px;
+      width: 2px;
+      height: 18px;
+      transform: rotate(45deg);
+    }
+
+    .preset-preview.star i::after {
+      left: 18px;
+      top: 1px;
+      width: 2px;
+      height: 18px;
+      transform: rotate(-45deg);
+    }
+
+    .preset-preview.heart {
+      width: 28px;
+      height: 24px;
+      color: var(--rose);
+      transform: rotate(-45deg) translateY(2px);
+      background: currentColor;
+      border-radius: 4px 4px 2px 4px;
+      box-shadow: 0 0 16px rgba(255, 109, 157, 0.45);
+    }
+
+    .preset-preview.heart::before,
+    .preset-preview.heart::after {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      opacity: 1;
+    }
+
+    .preset-preview.heart::before {
+      left: 0;
+      top: -14px;
+    }
+
+    .preset-preview.heart::after {
+      left: 14px;
+      top: 0;
+    }
+
+    .panel-note {
+      margin: 12px 0 0;
+      color: #aebccc;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .finger-cursor {
+      position: absolute;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 34px;
+      height: 34px;
+      margin: -17px 0 0 -17px;
+      border: 2px solid rgba(105, 229, 255, 0.94);
+      border-radius: 50%;
+      background: rgba(105, 229, 255, 0.1);
+      box-shadow: 0 0 24px rgba(105, 229, 255, 0.55);
+      opacity: 0;
+      transform: translate3d(-60px, -60px, 0) scale(0.84);
+      pointer-events: none;
+      transition: opacity 120ms ease, transform 80ms linear;
+    }
+
+    .finger-cursor.visible {
+      opacity: 1;
+    }
+
+    .finger-cursor::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: inherit;
+    }
+
+    .toast {
+      position: absolute;
+      z-index: 8;
+      left: 50%;
+      bottom: 24px;
+      max-width: min(720px, calc(100vw - 32px));
+      min-height: 38px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      background: rgba(9, 13, 20, 0.7);
+      color: #dfeaff;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .toast strong {
+      color: #ffffff;
+      font-weight: 760;
+    }
+
+    .error {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      top: 50%;
+      width: min(560px, calc(100vw - 36px));
+      padding: 18px;
+      border: 1px solid rgba(255, 118, 95, 0.45);
+      border-radius: 8px;
+      background: rgba(25, 12, 12, 0.9);
+      box-shadow: var(--shadow);
+      transform: translate(-50%, -50%);
+    }
+
+    .error[hidden] {
+      display: none;
+    }
+
+    .error h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .error p {
+      margin: 0;
+      color: #ffd7d0;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        grid-template-columns: 1fr;
+      }
+
+      .brand,
+      .meters {
+        width: 100%;
+      }
+
+      .meters {
+        justify-content: flex-start;
+      }
+
+      .panel {
+        top: 54%;
+        padding: 14px;
+      }
+
+      .panel-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .section.wide {
+        grid-column: auto;
+      }
+
+      .color-row {
+        grid-template-columns: repeat(3, minmax(54px, 1fr));
+      }
+
+      .size-row {
+        grid-template-columns: repeat(5, minmax(42px, 1fr));
+      }
+
+      .selectable {
+        min-height: 46px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 1ms !important;
+        animation-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app" aria-label="MediaPipe 隔空写字系统">
+    <video id="camera" autoplay muted playsinline></video>
+    <div class="video-shade"></div>
+    <canvas id="drawCanvas"></canvas>
+    <canvas id="fxCanvas"></canvas>
+    <canvas id="guideCanvas"></canvas>
+
+    <header class="topbar">
+      <div class="brand" aria-live="polite">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="brand-title">
+          <strong>隔空写字</strong>
+          <span id="statusText">正在加载 MediaPipe</span>
+        </div>
+      </div>
+      <div class="meters">
+        <div class="meter"><span id="cameraDot" class="dot warn"></span><span id="cameraState">摄像头</span></div>
+        <div class="meter"><span class="color-pill" id="activeColor"></span><span id="toolState">笔</span></div>
+        <div class="meter"><span id="sizeState">12px</span></div>
+        <div class="meter"><span id="scaleState">100%</span></div>
+      </div>
+    </header>
+
+    <section id="controlPanel" class="panel" aria-hidden="true">
+      <div class="panel-head">
+        <div class="panel-title">
+          <button class="selectable panel-close" type="button" data-selectable data-action="close-panel" aria-label="关闭工具面板">×</button>
+          <h1>工具面板</h1>
+        </div>
+        <div class="status"><span class="dot ready"></span><span id="panelState">食指悬停选择</span></div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="section">
+          <h2>工具</h2>
+          <div class="tool-row">
+            <button class="selectable active" type="button" data-selectable data-tool="pen">
+              <span class="tool-icon pen" aria-hidden="true"></span>
+              <span>笔</span>
+            </button>
+            <button class="selectable" type="button" data-selectable data-action="clear">
+              <span class="clear-icon" aria-hidden="true"></span>
+              <span>清除</span>
+            </button>
+            <button class="selectable" type="button" data-selectable data-tool="eraser">
+              <span class="tool-icon eraser" aria-hidden="true"></span>
+              <span>橡皮</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>粗细</h2>
+          <div class="size-row">
+            <button class="selectable" type="button" data-selectable data-size="5"><span class="size-dot" style="--size-dot: 5px"></span></button>
+            <button class="selectable" type="button" data-selectable data-size="9"><span class="size-dot" style="--size-dot: 9px"></span></button>
+            <button class="selectable active" type="button" data-selectable data-size="14"><span class="size-dot" style="--size-dot: 14px"></span></button>
+            <button class="selectable" type="button" data-selectable data-size="22"><span class="size-dot" style="--size-dot: 22px"></span></button>
+            <button class="selectable" type="button" data-selectable data-size="32"><span class="size-dot" style="--size-dot: 32px"></span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>预设涂鸦</h2>
+          <div class="preset-row">
+            <button class="selectable preset-card" type="button" data-selectable data-preset="hexagram">
+              <span class="preset-preview hexagram" aria-hidden="true"></span>
+              <span>六芒星</span>
+            </button>
+            <button class="selectable preset-card" type="button" data-selectable data-preset="star">
+              <span class="preset-preview star" aria-hidden="true"><i></i></span>
+              <span>星芒</span>
+            </button>
+            <button class="selectable preset-card" type="button" data-selectable data-preset="heart">
+              <span class="preset-preview heart" aria-hidden="true"><i></i></span>
+              <span>爱心</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section wide">
+          <h2>颜色</h2>
+          <div class="color-row">
+            <button class="selectable swatch active" type="button" data-selectable data-color="#69e5ff"><span style="--swatch: #69e5ff"></span></button>
+            <button class="selectable swatch" type="button" data-selectable data-color="#ff6d9d"><span style="--swatch: #ff6d9d"></span></button>
+            <button class="selectable swatch" type="button" data-selectable data-color="#a3ff7a"><span style="--swatch: #a3ff7a"></span></button>
+            <button class="selectable swatch" type="button" data-selectable data-color="#ffd35a"><span style="--swatch: #ffd35a"></span></button>
+            <button class="selectable swatch" type="button" data-selectable data-color="#f7fbff"><span style="--swatch: #f7fbff"></span></button>
+            <button class="selectable swatch" type="button" data-selectable data-color="#7a9cff"><span style="--swatch: #7a9cff"></span></button>
+          </div>
+          <p class="panel-note">张开整个手掌可打开或关闭面板，食指停在控件上完成选择。</p>
+        </div>
+      </div>
+    </section>
+
+    <div id="fingerCursor" class="finger-cursor" aria-hidden="true"></div>
+    <div id="toast" class="toast"><strong>整掌</strong> 打开面板 · <strong>食指+中指合拢</strong> 写字 · <strong>双手食指</strong> 缩放 · <strong>拇指+食指张开</strong> 消散</div>
+
+    <aside id="errorBox" class="error" hidden>
+      <h2>无法启动摄像头或 MediaPipe</h2>
+      <p id="errorText"></p>
+    </aside>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script>
+    (() => {
+      const video = document.getElementById("camera");
+      const drawCanvas = document.getElementById("drawCanvas");
+      const fxCanvas = document.getElementById("fxCanvas");
+      const guideCanvas = document.getElementById("guideCanvas");
+      const drawCtx = drawCanvas.getContext("2d");
+      const fxCtx = fxCanvas.getContext("2d");
+      const guideCtx = guideCanvas.getContext("2d");
+
+      const panel = document.getElementById("controlPanel");
+      const fingerCursor = document.getElementById("fingerCursor");
+      const statusText = document.getElementById("statusText");
+      const cameraDot = document.getElementById("cameraDot");
+      const cameraState = document.getElementById("cameraState");
+      const toolState = document.getElementById("toolState");
+      const sizeState = document.getElementById("sizeState");
+      const scaleState = document.getElementById("scaleState");
+      const activeColor = document.getElementById("activeColor");
+      const panelState = document.getElementById("panelState");
+      const errorBox = document.getElementById("errorBox");
+      const errorText = document.getElementById("errorText");
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+      const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+      const GESTURE_SMOOTHING = 0.72;
+      const PRESET_DOODLES = {
+        hexagram: [
+          Array.from({ length: 52 }, (_, i) => {
+            const vertices = [
+              { x: 0.5, y: 0.08 },
+              { x: 0.88, y: 0.74 },
+              { x: 0.12, y: 0.74 },
+              { x: 0.5, y: 0.08 }
+            ];
+            const t = (i / 51) * 3;
+            const segment = Math.min(2, Math.floor(t));
+            const local = t - segment;
+            const a = vertices[segment];
+            const b = vertices[segment + 1];
+            return {
+              x: lerp(a.x, b.x, local),
+              y: lerp(a.y, b.y, local)
+            };
+          }),
+          Array.from({ length: 52 }, (_, i) => {
+            const vertices = [
+              { x: 0.5, y: 0.92 },
+              { x: 0.12, y: 0.26 },
+              { x: 0.88, y: 0.26 },
+              { x: 0.5, y: 0.92 }
+            ];
+            const t = (i / 51) * 3;
+            const segment = Math.min(2, Math.floor(t));
+            const local = t - segment;
+            const a = vertices[segment];
+            const b = vertices[segment + 1];
+            return {
+              x: lerp(a.x, b.x, local),
+              y: lerp(a.y, b.y, local)
+            };
+          })
+        ],
+        star: [
+          [
+            { x: 0.5, y: 0.08 },
+            { x: 0.61, y: 0.36 },
+            { x: 0.92, y: 0.38 },
+            { x: 0.67, y: 0.56 },
+            { x: 0.77, y: 0.9 },
+            { x: 0.5, y: 0.7 },
+            { x: 0.23, y: 0.9 },
+            { x: 0.33, y: 0.56 },
+            { x: 0.08, y: 0.38 },
+            { x: 0.39, y: 0.36 },
+            { x: 0.5, y: 0.08 }
+          ]
+        ],
+        heart: [
+          {
+            mode: "fill",
+            color: "#ff6d9d",
+            points: Array.from({ length: 96 }, (_, i) => {
+              const angle = (Math.PI * 2 * i) / 96;
+              const x = 16 * Math.pow(Math.sin(angle), 3);
+              const y =
+                13 * Math.cos(angle) -
+                5 * Math.cos(2 * angle) -
+                2 * Math.cos(3 * angle) -
+                Math.cos(4 * angle);
+              return {
+                x: 0.5 + x / 34,
+                y: 0.58 - y / 32
+              };
+            })
+          }
+        ]
+      };
+      const MAX_ACTIVE_SNOWFLAKES = 820;
+      const SNOWFLAKE_SPRITE_CACHE_LIMIT = 72;
+      const snowflakeSpriteCache = new Map();
+
+      const state = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: Math.min(window.devicePixelRatio || 1, 2),
+        tool: "pen",
+        color: "#69e5ff",
+        size: 14,
+        scale: 1,
+        panelOpen: false,
+        strokes: [],
+        gestureStroke: null,
+        mouseStroke: null,
+        particles: [],
+        hands: [],
+        palmStart: 0,
+        lastPalmToggle: 0,
+        dissolveStart: 0,
+        lastDissolve: 0,
+        hoverEl: null,
+        hoverStart: 0,
+        lastActivated: null,
+        zoom: null,
+        smoothedPoint: null,
+        presetGroups: [],
+        nextPresetId: 1,
+        draggingPreset: null,
+        mouseDrawing: false,
+        mousePointerId: null,
+        lastFrameTime: performance.now(),
+        drawingDirty: true,
+        renderedScale: null,
+        renderedWidth: 0,
+        renderedHeight: 0
+      };
+
+      function resizeCanvases() {
+        state.width = window.innerWidth;
+        state.height = window.innerHeight;
+        state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        for (const canvas of [drawCanvas, fxCanvas, guideCanvas]) {
+          canvas.width = Math.floor(state.width * state.dpr);
+          canvas.height = Math.floor(state.height * state.dpr);
+          canvas.style.width = `${state.width}px`;
+          canvas.style.height = `${state.height}px`;
+        }
+
+        state.renderedScale = null;
+        state.drawingDirty = true;
+      }
+
+      function setCanvasSpace(ctx) {
+        ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      }
+
+      function viewOffset() {
+        return {
+          x: (state.width - state.width * state.scale) / 2,
+          y: (state.height - state.height * state.scale) / 2
+        };
+      }
+
+      function screenToWorld(point) {
+        const offset = viewOffset();
+        return {
+          x: (point.x - offset.x) / state.scale,
+          y: (point.y - offset.y) / state.scale
+        };
+      }
+
+      function worldToScreen(point) {
+        const offset = viewOffset();
+        return {
+          x: point.x * state.scale + offset.x,
+          y: point.y * state.scale + offset.y
+        };
+      }
+
+      function landmarkToScreen(point) {
+        const videoWidth = video.videoWidth || 640;
+        const videoHeight = video.videoHeight || 480;
+        const scale = Math.max(state.width / videoWidth, state.height / videoHeight);
+        const drawnWidth = videoWidth * scale;
+        const drawnHeight = videoHeight * scale;
+        const offsetX = (state.width - drawnWidth) / 2;
+        const offsetY = (state.height - drawnHeight) / 2;
+        const unmirroredX = offsetX + point.x * drawnWidth;
+
+        return {
+          x: state.width - unmirroredX,
+          y: offsetY + point.y * drawnHeight,
+          z: point.z || 0
+        };
+      }
+
+      function markDrawingDirty() {
+        state.drawingDirty = true;
+      }
+
+      function drawSmoothPath(ctx, points, size, color, mode) {
+        ctx.save();
+        ctx.globalCompositeOperation = mode === "erase" ? "destination-out" : "source-over";
+
+        if (mode === "fill") {
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length; i += 1) {
+            ctx.lineTo(points[i].x, points[i].y);
+          }
+          ctx.closePath();
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.restore();
+          return;
+        }
+
+        if (points.length < 2) {
+          if (points.length === 1) {
+            ctx.beginPath();
+            ctx.arc(points[0].x, points[0].y, size / 2, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+          }
+          ctx.restore();
+          return;
+        }
+
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = size;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+
+        for (let i = 1; i < points.length - 1; i += 1) {
+          const mid = midpoint(points[i], points[i + 1]);
+          ctx.quadraticCurveTo(points[i].x, points[i].y, mid.x, mid.y);
+        }
+
+        const last = points[points.length - 1];
+        ctx.lineTo(last.x, last.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function renderStrokesTo(ctx, includeDpr) {
+        if (includeDpr) {
+          setCanvasSpace(ctx);
+        } else {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+        ctx.clearRect(0, 0, state.width, state.height);
+        const offset = viewOffset();
+        ctx.save();
+        ctx.translate(offset.x, offset.y);
+        ctx.scale(state.scale, state.scale);
+
+        for (const stroke of state.strokes) {
+          const size = stroke.mode === "erase" ? stroke.size * 1.8 : stroke.size;
+          drawSmoothPath(ctx, stroke.points, size, stroke.color, stroke.mode);
+        }
+
+        ctx.restore();
+      }
+
+      function renderDrawing() {
+        const needsRender =
+          state.drawingDirty ||
+          state.renderedScale !== state.scale ||
+          state.renderedWidth !== state.width ||
+          state.renderedHeight !== state.height;
+
+        if (!needsRender) {
+          return;
+        }
+
+        renderStrokesTo(drawCtx, true);
+        state.drawingDirty = false;
+        state.renderedScale = state.scale;
+        state.renderedWidth = state.width;
+        state.renderedHeight = state.height;
+      }
+
+      function setPanelOpen(open) {
+        state.panelOpen = open;
+        panel.classList.toggle("open", open);
+        panel.setAttribute("aria-hidden", String(!open));
+        fingerCursor.classList.toggle("visible", open && Boolean(getPrimaryHand()));
+        statusText.textContent = open ? "面板已打开，食指悬停选择" : "准备写字";
+        state.hoverEl = null;
+        state.hoverStart = 0;
+        state.lastActivated = null;
+        clearHoverStyles();
+      }
+
+      function updateControlState() {
+        document.querySelectorAll("[data-tool]").forEach((el) => {
+          el.classList.toggle("active", el.dataset.tool === state.tool);
+        });
+        document.querySelectorAll("[data-color]").forEach((el) => {
+          el.classList.toggle("active", el.dataset.color.toLowerCase() === state.color.toLowerCase());
+        });
+        document.querySelectorAll("[data-size]").forEach((el) => {
+          el.classList.toggle("active", Number(el.dataset.size) === state.size);
+        });
+        toolState.textContent = state.tool === "pen" ? "笔" : "橡皮";
+        sizeState.textContent = `${state.size}px`;
+        scaleState.textContent = `${Math.round(state.scale * 100)}%`;
+        activeColor.style.setProperty("--active-color", state.color);
+      }
+
+      function createPresetStroke(points, presetId, options = {}) {
+        const stroke = {
+          mode: options.mode || "draw",
+          color: options.color || state.color,
+          size: options.size || clamp(state.size * 0.9, 7, 22),
+          points,
+          presetId
+        };
+        state.strokes.push(stroke);
+        markDrawingDirty();
+        return stroke;
+      }
+
+      function instantiatePresetPoints(points, bounds) {
+        return points.map((point) => ({
+          x: bounds.x + point.x * bounds.width,
+          y: bounds.y + point.y * bounds.height
+        }));
+      }
+
+      function getPresetPathPoints(path) {
+        return Array.isArray(path) ? path : path.points;
+      }
+
+      function distanceToSegment(point, a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        if (dx === 0 && dy === 0) {
+          return distance(point, a);
+        }
+
+        const t = clamp(((point.x - a.x) * dx + (point.y - a.y) * dy) / (dx * dx + dy * dy), 0, 1);
+        return Math.hypot(point.x - (a.x + dx * t), point.y - (a.y + dy * t));
+      }
+
+      function refreshPresetGroupBounds(group) {
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        for (const stroke of group.strokes) {
+          for (const point of stroke.points) {
+            minX = Math.min(minX, point.x);
+            minY = Math.min(minY, point.y);
+            maxX = Math.max(maxX, point.x);
+            maxY = Math.max(maxY, point.y);
+          }
+        }
+
+        group.bounds = minX === Infinity
+          ? null
+          : { minX, minY, maxX, maxY };
+        return group.bounds;
+      }
+
+      function isPointNearStroke(point, stroke, padding) {
+        if (!stroke.points.length) return false;
+        if (stroke.mode === "fill" && pointInPolygon(point, stroke.points)) return true;
+
+        const hitRadius = stroke.size * 0.72 + padding;
+
+        if (stroke.points.length === 1) {
+          return distance(point, stroke.points[0]) <= hitRadius;
+        }
+
+        for (let i = 1; i < stroke.points.length; i += 1) {
+          if (distanceToSegment(point, stroke.points[i - 1], stroke.points[i]) <= hitRadius) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      function pointInPolygon(point, points) {
+        let inside = false;
+        for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
+          const a = points[i];
+          const b = points[j];
+          const crosses =
+            a.y > point.y !== b.y > point.y &&
+            point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+          if (crosses) inside = !inside;
+        }
+        return inside;
+      }
+
+      function findPresetGroupAtPoint(point) {
+        const padding = 14 / state.scale;
+
+        for (let i = state.presetGroups.length - 1; i >= 0; i -= 1) {
+          const group = state.presetGroups[i];
+          const bounds = group.bounds || refreshPresetGroupBounds(group);
+          if (!bounds) continue;
+
+          if (
+            point.x < bounds.minX - padding ||
+            point.x > bounds.maxX + padding ||
+            point.y < bounds.minY - padding ||
+            point.y > bounds.maxY + padding
+          ) {
+            continue;
+          }
+
+          if (group.strokes.some((stroke) => isPointNearStroke(point, stroke, padding))) {
+            return group;
+          }
+        }
+
+        return null;
+      }
+
+      function movePresetGroup(group, dx, dy) {
+        for (const stroke of group.strokes) {
+          for (const point of stroke.points) {
+            point.x += dx;
+            point.y += dy;
+          }
+        }
+
+        if (group.bounds) {
+          group.bounds = {
+            minX: group.bounds.minX + dx,
+            minY: group.bounds.minY + dy,
+            maxX: group.bounds.maxX + dx,
+            maxY: group.bounds.maxY + dy
+          };
+        }
+
+        markDrawingDirty();
+      }
+
+      function addPresetDoodle(name) {
+        const preset = PRESET_DOODLES[name];
+        if (!preset) return;
+
+        const center = screenToWorld({ x: state.width * 0.5, y: state.height * 0.53 });
+        const span = Math.min(state.width, state.height) / state.scale;
+        const width = span * 0.42;
+        const height = span * 0.3;
+        const bounds = {
+          x: center.x - width / 2,
+          y: center.y - height / 2,
+          width,
+          height
+        };
+
+        const presetId = state.nextPresetId++;
+        const strokes = preset.map((path) => {
+          const points = instantiatePresetPoints(getPresetPathPoints(path), bounds);
+          return createPresetStroke(points, presetId, {
+            mode: path.mode,
+            color: path.color,
+            size: path.mode === "fill" ? 8 : undefined
+          });
+        });
+        const group = { id: presetId, strokes, bounds: null };
+        refreshPresetGroupBounds(group);
+        state.presetGroups.push(group);
+        state.tool = "pen";
+        endAllStrokes();
+        statusText.textContent = "已生成预设涂鸦";
+      }
+
+      function clearHoverStyles() {
+        document.querySelectorAll(".selectable").forEach((el) => {
+          el.classList.remove("hovering");
+          el.style.setProperty("--hover-progress", "0");
+        });
+      }
+
+      function applyPanelAction(el) {
+        if (!el) return;
+
+        if (el.dataset.action === "close-panel") {
+          setPanelOpen(false);
+          return;
+        }
+
+        if (el.dataset.action === "clear") {
+          clearWriting();
+          panelState.textContent = "笔迹已清除";
+          updateControlState();
+          return;
+        }
+
+        if (el.dataset.preset) {
+          addPresetDoodle(el.dataset.preset);
+          panelState.textContent = "已生成预设涂鸦";
+          updateControlState();
+          return;
+        }
+
+        if (el.dataset.tool) {
+          state.tool = el.dataset.tool;
+          panelState.textContent = state.tool === "pen" ? "已选择笔" : "已选择橡皮";
+        }
+
+        if (el.dataset.color) {
+          state.color = el.dataset.color;
+          state.tool = "pen";
+          panelState.textContent = "已选择颜色";
+        }
+
+        if (el.dataset.size) {
+          state.size = Number(el.dataset.size);
+          panelState.textContent = "已选择粗细";
+        }
+
+        updateControlState();
+      }
+
+      function setupPanelMouseControls() {
+        panel.querySelectorAll("[data-selectable]").forEach((el) => {
+          el.addEventListener("click", () => {
+            applyPanelAction(el);
+            state.lastActivated = el;
+          });
+        });
+      }
+
+      function getSelectableAt(point) {
+        const controls = panel.querySelectorAll("[data-selectable]");
+        for (const el of controls) {
+          const rect = el.getBoundingClientRect();
+          if (
+            point.x >= rect.left &&
+            point.x <= rect.right &&
+            point.y >= rect.top &&
+            point.y <= rect.bottom
+          ) {
+            return el;
+          }
+        }
+        return null;
+      }
+
+      function updatePanelHover(hand, now) {
+        if (!state.panelOpen || !hand) {
+          fingerCursor.classList.remove("visible");
+          clearHoverStyles();
+          return;
+        }
+
+        const index = hand.screen[8];
+        fingerCursor.classList.add("visible");
+        fingerCursor.style.transform = `translate3d(${index.x}px, ${index.y}px, 0) scale(1)`;
+
+        const target = getSelectableAt(index);
+        if (target !== state.hoverEl) {
+          clearHoverStyles();
+          state.hoverEl = target;
+          state.hoverStart = now;
+          state.lastActivated = null;
+        }
+
+        if (!target) {
+          panelState.textContent = "食指悬停选择";
+          return;
+        }
+
+        const progress = clamp((now - state.hoverStart) / 650, 0, 1);
+        target.classList.add("hovering");
+        target.style.setProperty("--hover-progress", String(progress));
+
+        if (progress >= 1 && state.lastActivated !== target) {
+          applyPanelAction(target);
+          state.lastActivated = target;
+          state.hoverStart = now + 250;
+        }
+      }
+
+      function normalizedDistance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
+      }
+
+      function analyzeHand(landmarks, index) {
+        const screen = landmarks.map(landmarkToScreen);
+
+        const palm = Math.max(
+          normalizedDistance(landmarks[0], landmarks[9]),
+          normalizedDistance(landmarks[5], landmarks[17]),
+          0.001
+        );
+
+        const farFromWrist = (tip, pip, ratio = 1.08) =>
+          normalizedDistance(landmarks[tip], landmarks[0]) >
+          normalizedDistance(landmarks[pip], landmarks[0]) * ratio;
+
+        const aboveJoint = (tip, pip) => landmarks[tip].y < landmarks[pip].y + palm * 0.12;
+        const indexOpen = farFromWrist(8, 6, 1.05) && aboveJoint(8, 6);
+        const middleOpen = farFromWrist(12, 10, 1.05) && aboveJoint(12, 10);
+        const ringOpen = farFromWrist(16, 14, 1.04) && aboveJoint(16, 14);
+        const pinkyOpen = farFromWrist(20, 18, 1.04) && aboveJoint(20, 18);
+        const thumbIndexGap = normalizedDistance(landmarks[4], landmarks[8]);
+        const thumbOut = normalizedDistance(landmarks[4], landmarks[0]) > normalizedDistance(landmarks[3], landmarks[0]) * 1.03;
+        const thumbOpen = thumbOut && normalizedDistance(landmarks[4], landmarks[5]) > palm * 0.36;
+        const indexMiddleGap = normalizedDistance(landmarks[8], landmarks[12]);
+        const openPalm = thumbOpen && indexOpen && middleOpen && ringOpen && pinkyOpen;
+        const writeGesture = indexOpen && middleOpen && indexMiddleGap < palm * 0.33;
+        const dissolveGesture =
+          thumbOpen &&
+          indexOpen &&
+          thumbIndexGap > palm * 0.92 &&
+          !middleOpen &&
+          !ringOpen &&
+          !pinkyOpen;
+
+        const center = screen.reduce((sum, p) => ({ x: sum.x + p.x, y: sum.y + p.y }), { x: 0, y: 0 });
+
+        return {
+          index,
+          landmarks,
+          screen,
+          palm,
+          center: { x: center.x / screen.length, y: center.y / screen.length },
+          indexOpen,
+          middleOpen,
+          ringOpen,
+          pinkyOpen,
+          thumbOpen,
+          openPalm,
+          thumbIndexGap,
+          indexMiddleGap,
+          writeGesture,
+          dissolveGesture
+        };
+      }
+
+      function getPrimaryHand() {
+        if (!state.hands.length) return null;
+        return [...state.hands].sort((a, b) => b.palm - a.palm)[0];
+      }
+
+      function handlePalmToggle(hand, now) {
+        if (!hand || !hand.openPalm) {
+          state.palmStart = 0;
+          return;
+        }
+
+        if (!state.palmStart) {
+          state.palmStart = now;
+        }
+
+        if (now - state.palmStart > 620 && now - state.lastPalmToggle > 1300) {
+          setPanelOpen(!state.panelOpen);
+          state.lastPalmToggle = now;
+          state.palmStart = 0;
+        }
+      }
+
+      function handleZoom(now) {
+        if (state.panelOpen || state.hands.length < 2) {
+          state.zoom = null;
+          return false;
+        }
+
+        const usable = state.hands.filter((hand) => hand.indexOpen);
+        if (usable.length < 2) {
+          state.zoom = null;
+          return false;
+        }
+
+        const a = usable[0].screen[8];
+        const b = usable[1].screen[8];
+        const currentDistance = Math.max(distance(a, b), 1);
+
+        if (!state.zoom) {
+          state.zoom = {
+            distance: currentDistance,
+            scale: state.scale,
+            startedAt: now
+          };
+        }
+
+        const nextScale = clamp(state.zoom.scale * (currentDistance / state.zoom.distance), 0.35, 3.5);
+        state.scale = lerp(state.scale, nextScale, 0.28);
+        scaleState.textContent = `${Math.round(state.scale * 100)}%`;
+        statusText.textContent = "双手食指缩放中";
+        endGestureStroke();
+        return true;
+      }
+
+      function createStroke(point) {
+        const mode = state.tool === "eraser" ? "erase" : "draw";
+        const stroke = {
+          mode,
+          color: mode === "erase" ? "rgba(0,0,0,1)" : state.color,
+          size: state.size,
+          points: [point],
+          presetId: null
+        };
+        state.strokes.push(stroke);
+        markDrawingDirty();
+        return stroke;
+      }
+
+      function appendStrokePoint(channel, point) {
+        const currentMode = state.tool === "eraser" ? "erase" : "draw";
+        const key = channel === "mouse" ? "mouseStroke" : "gestureStroke";
+
+        if (!state[key] || state[key].mode !== currentMode) {
+          state[key] = createStroke(point);
+          return;
+        }
+
+        const last = state[key].points[state[key].points.length - 1];
+        if (distance(last, point) > 1.2) {
+          state[key].points.push(point);
+          markDrawingDirty();
+        }
+      }
+
+      function endGestureStroke() {
+        state.gestureStroke = null;
+        state.smoothedPoint = null;
+      }
+
+      function endMouseStroke() {
+        state.mouseStroke = null;
+      }
+
+      function endAllStrokes() {
+        endGestureStroke();
+        endMouseStroke();
+      }
+
+      function clearWriting() {
+        state.strokes = [];
+        state.particles = [];
+        state.presetGroups = [];
+        state.draggingPreset = null;
+        endAllStrokes();
+        markDrawingDirty();
+        statusText.textContent = "笔迹已清除";
+      }
+
+      function handleWriting(hand) {
+        if (!hand || state.panelOpen || state.hands.length > 1 || state.draggingPreset) {
+          endGestureStroke();
+          return;
+        }
+
+        if (!hand.writeGesture) {
+          endGestureStroke();
+          return;
+        }
+
+        const rawPoint = midpoint(hand.screen[8], hand.screen[12]);
+        if (!state.smoothedPoint) {
+          state.smoothedPoint = rawPoint;
+        } else {
+          state.smoothedPoint = {
+            x: lerp(state.smoothedPoint.x, rawPoint.x, GESTURE_SMOOTHING),
+            y: lerp(state.smoothedPoint.y, rawPoint.y, GESTURE_SMOOTHING)
+          };
+        }
+
+        const point = screenToWorld(state.smoothedPoint);
+        appendStrokePoint("gesture", point);
+
+        const currentMode = state.tool === "eraser" ? "erase" : "draw";
+        statusText.textContent = currentMode === "erase" ? "橡皮擦除中" : "写字中";
+      }
+
+      function setupMouseDrawing() {
+        const pointerToWorld = (event) => screenToWorld({ x: event.clientX, y: event.clientY });
+
+        window.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0 || state.panelOpen) {
+            return;
+          }
+
+          const point = pointerToWorld(event);
+          const presetGroup = findPresetGroupAtPoint(point);
+          if (presetGroup) {
+            state.draggingPreset = {
+              group: presetGroup,
+              pointerId: event.pointerId,
+              lastPoint: point
+            };
+            statusText.textContent = "拖动预设涂鸦中";
+            event.preventDefault();
+            return;
+          }
+
+          state.mouseDrawing = true;
+          state.mousePointerId = event.pointerId;
+          appendStrokePoint("mouse", point);
+          statusText.textContent = state.tool === "eraser" ? "鼠标橡皮擦除中" : "鼠标书写中";
+          event.preventDefault();
+        });
+
+        window.addEventListener("pointermove", (event) => {
+          if (state.draggingPreset && event.pointerId === state.draggingPreset.pointerId) {
+            const nextPoint = pointerToWorld(event);
+            const dx = nextPoint.x - state.draggingPreset.lastPoint.x;
+            const dy = nextPoint.y - state.draggingPreset.lastPoint.y;
+            if (dx !== 0 || dy !== 0) {
+              movePresetGroup(state.draggingPreset.group, dx, dy);
+              state.draggingPreset.lastPoint = nextPoint;
+              statusText.textContent = "拖动预设涂鸦中";
+            }
+            event.preventDefault();
+            return;
+          }
+
+          if (!state.mouseDrawing || event.pointerId !== state.mousePointerId) {
+            return;
+          }
+
+          appendStrokePoint("mouse", pointerToWorld(event));
+          statusText.textContent = state.tool === "eraser" ? "鼠标橡皮擦除中" : "鼠标书写中";
+          event.preventDefault();
+        });
+
+        const stopMouseDrawing = (event) => {
+          if (state.draggingPreset && event.pointerId === state.draggingPreset.pointerId) {
+            state.draggingPreset = null;
+            statusText.textContent = "预设涂鸦已移动";
+            event.preventDefault();
+            return;
+          }
+
+          if (!state.mouseDrawing || event.pointerId !== state.mousePointerId) {
+            return;
+          }
+
+          state.mouseDrawing = false;
+          state.mousePointerId = null;
+          endMouseStroke();
+          statusText.textContent = "鼠标书写结束";
+        };
+
+        window.addEventListener("pointerup", stopMouseDrawing);
+        window.addEventListener("pointercancel", stopMouseDrawing);
+      }
+
+      function sampleStrokesForParticles() {
+        const offscreen = document.createElement("canvas");
+        offscreen.width = state.width;
+        offscreen.height = state.height;
+        const ctx = offscreen.getContext("2d", { willReadFrequently: true });
+        renderStrokesTo(ctx, false);
+
+        const image = ctx.getImageData(0, 0, state.width, state.height);
+        const data = image.data;
+        const particles = [];
+        const totalPixels = state.width * state.height;
+        const step = clamp(Math.round(Math.sqrt(totalPixels / 56000)), 8, 17);
+        const maxParticles = totalPixels > 1600000 ? 680 : MAX_ACTIVE_SNOWFLAKES;
+        const chance = state.strokes.length > 26 ? 0.18 : 0.3;
+
+        const createParticle = (x, y, r, g, b) => {
+          const brighten = 0.58;
+          return {
+            x: x + (Math.random() - 0.5) * step * 0.85,
+            y: y + (Math.random() - 0.5) * step * 0.85,
+            vx: (Math.random() - 0.5) * 0.04,
+            vy: 0.012 + Math.random() * 0.035,
+            sway: (Math.random() - 0.5) * 0.055,
+            phase: Math.random() * Math.PI * 2,
+            size: 3.6 + Math.random() * 5.6,
+            spin: (Math.random() - 0.5) * 0.008,
+            rotation: Math.random() * Math.PI,
+            life: 1,
+            decay: 0.00028 + Math.random() * 0.00024,
+            color: {
+              r: Math.round(lerp(r, 255, brighten)),
+              g: Math.round(lerp(g, 255, brighten)),
+              b: Math.round(lerp(b, 255, brighten))
+            }
+          };
+        };
+
+        let sampledCount = 0;
+        for (let y = 0; y < state.height; y += step) {
+          for (let x = 0; x < state.width; x += step) {
+            const idx = (y * state.width + x) * 4;
+            const alpha = data[idx + 3];
+            if (alpha > 40 && Math.random() < chance) {
+              sampledCount += 1;
+              const particle = createParticle(x, y, data[idx], data[idx + 1], data[idx + 2]);
+
+              if (particles.length < maxParticles) {
+                particles.push(particle);
+              } else {
+                const replaceIndex = Math.floor(Math.random() * sampledCount);
+                if (replaceIndex < maxParticles) {
+                  particles[replaceIndex] = particle;
+                }
+              }
+            }
+          }
+        }
+
+        return particles;
+      }
+
+      function dissolveWriting() {
+        if (!state.strokes.length) return;
+        const flakes = sampleStrokesForParticles();
+        state.particles.push(...flakes);
+        if (state.particles.length > MAX_ACTIVE_SNOWFLAKES) {
+          state.particles.splice(0, state.particles.length - MAX_ACTIVE_SNOWFLAKES);
+        }
+        state.strokes = [];
+        state.presetGroups = [];
+        state.draggingPreset = null;
+        endAllStrokes();
+        markDrawingDirty();
+        statusText.textContent = "字迹正在消散";
+      }
+
+      function handleDissolve(hand, now) {
+        if (!hand || state.panelOpen || state.hands.length > 1) {
+          state.dissolveStart = 0;
+          return;
+        }
+
+        if (!hand.dissolveGesture) {
+          state.dissolveStart = 0;
+          return;
+        }
+
+        if (!state.dissolveStart) {
+          state.dissolveStart = now;
+        }
+
+        if (now - state.dissolveStart > 520 && now - state.lastDissolve > 1600) {
+          dissolveWriting();
+          state.lastDissolve = now;
+          state.dissolveStart = 0;
+        }
+      }
+
+      function quantizedColorValue(value) {
+        return clamp(Math.round(value / 32) * 32, 0, 255);
+      }
+
+      function getSnowflakeSprite(particle) {
+        const size = Math.round(particle.size * 2) / 2;
+        const r = quantizedColorValue(particle.color.r);
+        const g = quantizedColorValue(particle.color.g);
+        const b = quantizedColorValue(particle.color.b);
+        const spriteScale = Math.min(Math.max(state.dpr, 1), 1.5);
+        const key = `${size}:${r}:${g}:${b}:${Math.round(spriteScale * 10)}`;
+        const cached = snowflakeSpriteCache.get(key);
+        if (cached) return cached;
+
+        const logicalSize = Math.ceil(size * 2 + 10);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(logicalSize * spriteScale);
+        canvas.height = Math.ceil(logicalSize * spriteScale);
+
+        const spriteCtx = canvas.getContext("2d");
+        spriteCtx.setTransform(spriteScale, 0, 0, spriteScale, 0, 0);
+        spriteCtx.translate(logicalSize / 2, logicalSize / 2);
+        spriteCtx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+        spriteCtx.lineWidth = 1.15;
+        spriteCtx.lineCap = "round";
+        spriteCtx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.35)`;
+        spriteCtx.shadowBlur = Math.max(2, size * 0.34);
+
+        for (let i = 0; i < 6; i += 1) {
+          spriteCtx.save();
+          spriteCtx.rotate((Math.PI * 2 * i) / 6);
+          spriteCtx.beginPath();
+          spriteCtx.moveTo(0, 0);
+          spriteCtx.lineTo(size, 0);
+          spriteCtx.stroke();
+
+          if (size > 3.8) {
+            spriteCtx.beginPath();
+            spriteCtx.moveTo(size * 0.58, 0);
+            spriteCtx.lineTo(size * 0.36, size * 0.18);
+            spriteCtx.moveTo(size * 0.58, 0);
+            spriteCtx.lineTo(size * 0.36, -size * 0.18);
+            spriteCtx.stroke();
+          }
+          spriteCtx.restore();
+        }
+
+        spriteCtx.shadowBlur = 0;
+        spriteCtx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.72)`;
+        spriteCtx.beginPath();
+        spriteCtx.arc(0, 0, Math.max(0.8, size * 0.12), 0, Math.PI * 2);
+        spriteCtx.fill();
+
+        const sprite = { canvas, logicalSize };
+        snowflakeSpriteCache.set(key, sprite);
+        if (snowflakeSpriteCache.size > SNOWFLAKE_SPRITE_CACHE_LIMIT) {
+          snowflakeSpriteCache.delete(snowflakeSpriteCache.keys().next().value);
+        }
+        return sprite;
+      }
+
+      function drawSnowflake(ctx, particle) {
+        const alpha = clamp(particle.life, 0, 1);
+        if (alpha <= 0.01) return;
+
+        const sprite = getSnowflakeSprite(particle);
+        ctx.save();
+        ctx.translate(particle.x, particle.y);
+        ctx.rotate(particle.rotation);
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(
+          sprite.canvas,
+          -sprite.logicalSize / 2,
+          -sprite.logicalSize / 2,
+          sprite.logicalSize,
+          sprite.logicalSize
+        );
+        ctx.restore();
+      }
+
+      function renderParticles(dt, now) {
+        setCanvasSpace(fxCtx);
+        fxCtx.clearRect(0, 0, state.width, state.height);
+
+        const nextParticles = [];
+        for (const particle of state.particles) {
+          particle.phase += 0.0018 * dt;
+          particle.x += (particle.vx + Math.sin(particle.phase) * particle.sway) * dt;
+          particle.y += particle.vy * dt;
+          particle.vy += 0.000012 * dt;
+          particle.rotation += particle.spin * dt;
+          particle.life -= particle.decay * dt;
+
+          if (particle.life > 0 && particle.y < state.height + 80) {
+            drawSnowflake(fxCtx, particle, now);
+            nextParticles.push(particle);
+          }
+        }
+        state.particles = nextParticles;
+      }
+
+      function drawHandGuide() {
+        setCanvasSpace(guideCtx);
+        guideCtx.clearRect(0, 0, state.width, state.height);
+
+        for (const hand of state.hands) {
+          const tips = [4, 8, 12, 16, 20];
+          guideCtx.save();
+          guideCtx.lineWidth = 1.5;
+          guideCtx.strokeStyle = "rgba(105, 229, 255, 0.42)";
+          guideCtx.fillStyle = "rgba(105, 229, 255, 0.16)";
+
+          for (const idx of tips) {
+            const p = hand.screen[idx];
+            guideCtx.beginPath();
+            guideCtx.arc(p.x, p.y, idx === 8 ? 8 : 5, 0, Math.PI * 2);
+            guideCtx.fill();
+            guideCtx.stroke();
+          }
+
+          if (hand.writeGesture) {
+            const p = midpoint(hand.screen[8], hand.screen[12]);
+            guideCtx.strokeStyle = state.tool === "eraser" ? "rgba(255, 109, 157, 0.92)" : "rgba(163, 255, 122, 0.92)";
+            guideCtx.lineWidth = 2;
+            guideCtx.beginPath();
+            guideCtx.arc(p.x, p.y, state.tool === "eraser" ? state.size * 1.15 : state.size * 0.72, 0, Math.PI * 2);
+            guideCtx.stroke();
+          }
+
+          if (hand.dissolveGesture && !state.panelOpen) {
+            guideCtx.strokeStyle = "rgba(255, 211, 90, 0.9)";
+            guideCtx.lineWidth = 2;
+            guideCtx.beginPath();
+            guideCtx.moveTo(hand.screen[4].x, hand.screen[4].y);
+            guideCtx.lineTo(hand.screen[8].x, hand.screen[8].y);
+            guideCtx.stroke();
+          }
+
+          guideCtx.restore();
+        }
+      }
+
+      function handleGestures(now) {
+        if (state.draggingPreset) {
+          endGestureStroke();
+          return;
+        }
+
+        const primary = getPrimaryHand();
+        handlePalmToggle(primary, now);
+        updatePanelHover(primary, now);
+
+        const isZooming = handleZoom(now);
+        if (!isZooming) {
+          handleDissolve(primary, now);
+          handleWriting(primary);
+        }
+
+        if (!primary && !state.panelOpen && !state.mouseDrawing && !state.draggingPreset) {
+          endGestureStroke();
+          statusText.textContent = "等待手势";
+        }
+      }
+
+      function renderLoop(now) {
+        const dt = clamp(now - state.lastFrameTime, 8, 40);
+        state.lastFrameTime = now;
+        renderDrawing();
+        renderParticles(dt, now);
+        drawHandGuide();
+        requestAnimationFrame(renderLoop);
+      }
+
+      function onResults(results) {
+        state.hands = (results.multiHandLandmarks || []).map((landmarks, index) => analyzeHand(landmarks, index));
+        const now = performance.now();
+        if (state.hands.length) {
+          cameraDot.className = "dot ready";
+          cameraState.textContent = `${state.hands.length}只手`;
+        } else {
+          cameraDot.className = "dot warn";
+          cameraState.textContent = "寻找手";
+        }
+        handleGestures(now);
+      }
+
+      function showError(message) {
+        errorText.textContent = message;
+        errorBox.hidden = false;
+        cameraDot.className = "dot busy";
+        cameraState.textContent = "不可用";
+        statusText.textContent = "启动失败";
+      }
+
+      async function start() {
+        resizeCanvases();
+        updateControlState();
+        requestAnimationFrame(renderLoop);
+
+        if (!window.Hands || !window.Camera) {
+          showError("脚本没有加载成功。请确认浏览器可以访问 jsDelivr CDN，然后重新打开这个 HTML 文件。");
+          return;
+        }
+
+        const hands = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 0,
+          minDetectionConfidence: 0.6,
+          minTrackingConfidence: 0.72
+        });
+        hands.onResults(onResults);
+
+        try {
+          let processingFrame = false;
+          const camera = new Camera(video, {
+            onFrame: async () => {
+              if (processingFrame) return;
+              processingFrame = true;
+              try {
+                await hands.send({ image: video });
+              } finally {
+                processingFrame = false;
+              }
+            },
+            width: 640,
+            height: 480
+          });
+          await camera.start();
+          cameraDot.className = "dot ready";
+          cameraState.textContent = "已启动";
+          statusText.textContent = "等待手势";
+        } catch (error) {
+          showError(`浏览器拒绝或无法访问摄像头：${error.message || error}`);
+        }
+      }
+
+      window.addEventListener("resize", resizeCanvases);
+      window.addEventListener("keydown", (event) => {
+        if (event.key.toLowerCase() === "c") {
+          clearWriting();
+        }
+        if (event.key === "Escape") {
+          setPanelOpen(false);
+        }
+      });
+
+      setupPanelMouseControls();
+      setupMouseDrawing();
+      start();
+    })();
+  </script>
+</body>
+</html>

@@ -11,7 +11,11 @@
 
     <style>
         :root {
-            color-scheme: dark;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.14);
+            --text: rgba(247, 252, 255, 0.92);
+            --muted: rgba(247, 252, 255, 0.65);
         }
 
         * {
@@ -21,10 +25,11 @@
         body {
             align-items: center;
             background:
-                radial-gradient(circle at top, rgba(60, 120, 255, 0.18), transparent 38%),
-                radial-gradient(circle at bottom, rgba(45, 210, 255, 0.12), transparent 42%),
-                #050816;
-            color: #eaf4ff;
+                radial-gradient(circle at 14% 18%, rgba(141, 233, 255, 0.18), transparent 28vw),
+                radial-gradient(circle at 88% 8%, rgba(53, 106, 255, 0.18), transparent 24vw),
+                radial-gradient(circle at 72% 82%, rgba(123, 108, 255, 0.12), transparent 20vw),
+                linear-gradient(135deg, #050914, #0b1325 48%, #060a13);
+            color: var(--text);
             display: flex;
             font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
             height: 100vh;
@@ -32,6 +37,17 @@
             margin: 0;
             overflow: hidden;
             position: relative;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                linear-gradient(120deg, rgba(2, 6, 16, 0.42), rgba(5, 12, 26, 0.16) 42%, rgba(3, 8, 18, 0.36)),
+                radial-gradient(circle at 50% 0, rgba(141, 233, 255, 0.16), transparent 42%);
         }
 
         .input_video {
@@ -68,15 +84,15 @@
         }
 
         .startup-card {
-            background: rgba(7, 14, 31, 0.78);
-            border: 1px solid rgba(126, 194, 255, 0.28);
-            border-radius: 28px;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
             max-width: 560px;
-            padding: 30px 28px 26px;
+            padding: 32px 30px 28px;
             text-align: center;
-            -webkit-backdrop-filter: blur(18px);
-            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            backdrop-filter: blur(20px) saturate(140%);
             transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
@@ -87,33 +103,45 @@
         }
 
         .startup-badge {
-            background: rgba(110, 192, 255, 0.16);
-            border: 1px solid rgba(132, 204, 255, 0.32);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 999px;
-            color: #9fd9ff;
+            color: rgba(247, 252, 255, 0.85);
             display: inline-flex;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.08em;
             margin-bottom: 18px;
-            padding: 7px 12px;
+            padding: 7px 14px;
             text-transform: uppercase;
         }
 
         .startup-card h1 {
             font-size: 34px;
             margin: 0 0 12px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff, #b8e8ff 50%, #ffffff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 6s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .startup-desc {
-            color: rgba(231, 241, 255, 0.82);
+            color: var(--muted);
             line-height: 1.8;
             margin: 0 auto 22px;
             max-width: 32em;
         }
 
         .hint-list {
-            color: rgba(196, 221, 255, 0.84);
+            color: rgba(247, 252, 255, 0.58);
             font-size: 14px;
             line-height: 1.8;
             margin: 0 0 22px;
@@ -133,8 +161,8 @@
         }
 
         .start-button {
-            background: linear-gradient(135deg, #70c5ff 0%, #4b8dff 48%, #776cff 100%);
-            border: none;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 999px;
             color: #fff;
             cursor: pointer;
@@ -142,11 +170,15 @@
             font-weight: 700;
             min-width: 180px;
             padding: 14px 22px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
         }
 
         .start-button:hover {
-            box-shadow: 0 14px 34px rgba(88, 155, 255, 0.34);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.15);
             transform: translateY(-2px);
         }
 
@@ -156,7 +188,7 @@
         }
 
         .status-text {
-            color: #cfe8ff;
+            color: var(--muted);
             font-size: 14px;
             line-height: 1.7;
             margin: 0;
@@ -168,7 +200,7 @@
         }
 
         .status-text.success {
-            color: #8effd6;
+            color: #a0f0d0;
         }
 
         .top-bar {
@@ -182,25 +214,30 @@
         }
 
         .top-link {
-            background: rgba(8, 18, 38, 0.72);
-            border: 1px solid rgba(126, 194, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
-            color: #dcedff;
+            color: var(--text);
             padding: 10px 14px;
             text-decoration: none;
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            backdrop-filter: blur(14px) saturate(150%);
+            transition: background 0.2s ease;
+        }
+
+        .top-link:hover {
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .mode-chip {
-            background: rgba(8, 18, 38, 0.72);
-            border: 1px solid rgba(126, 194, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
-            color: #dcedff;
+            color: var(--text);
             font-size: 14px;
             padding: 10px 14px;
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            backdrop-filter: blur(14px) saturate(150%);
         }
 
         @media (max-width: 720px) {
@@ -261,7 +298,7 @@
         const modeChip = document.getElementById("modeChip");
 
         function setStatus(text, type) {
-            statusText.textContent = text;
+            statusText.innerHTML = text;
             statusText.className = "status-text" + (type ? " " + type : "");
         }
 
@@ -270,10 +307,12 @@
         }
 
         function hideStartup() {
+            const layer = document.getElementById("startupLayer");
+            if (!layer) return;
+            layer.style.pointerEvents = "none";
             startupCard.classList.add("hidden");
             window.setTimeout(() => {
-                const layer = document.getElementById("startupLayer");
-                if (layer) layer.style.display = "none";
+                layer.style.display = "none";
             }, 380);
         }
 
@@ -1032,6 +1071,12 @@
                 const isMobileViewport = Math.min(window.innerWidth, window.innerHeight) <= 720;
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     throw new Error("当前浏览器不支持摄像头 API，请换系统浏览器或使用 HTTPS 页面打开");
+                }
+
+                // Browsers block getUserMedia on http://127.0.0.1 — redirect to localhost
+                if (window.location.hostname === "127.0.0.1" && window.location.protocol === "http:") {
+                    const localhostUrl = window.location.href.replace("127.0.0.1", "localhost");
+                    throw new Error(`浏览器不允许在 http://127.0.0.1 下访问摄像头。请改为访问：<a href="${localhostUrl}" style="color:#b8e8ff;font-weight:700;text-decoration:underline">${localhostUrl}</a>`);
                 }
 
                 const stream = await navigator.mediaDevices.getUserMedia({

@@ -7,7 +7,12 @@
     <link rel="icon" href="/images/custom-particlex-avatar.png" />
     <style>
         :root {
-            color-scheme: dark;
+            --game-accent: #8de9ff;
+            --game-warm: #ffd499;
+            --game-glass: rgba(8, 18, 36, 0.56);
+            --game-glass-border: rgba(141, 233, 255, 0.14);
+            --game-glass-hover: rgba(141, 233, 255, 0.16);
+            --game-radius: 20px;
         }
 
         * {
@@ -18,356 +23,532 @@
             margin: 0;
             min-height: 100vh;
             font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            color: #eef8ff;
+            color: rgba(237, 247, 255, 0.95);
             background:
-                radial-gradient(circle at 15% 20%, rgba(115, 255, 228, 0.26), transparent 30%),
-                radial-gradient(circle at 85% 15%, rgba(89, 174, 255, 0.2), transparent 28%),
-                linear-gradient(135deg, #081322 0%, #0f2842 42%, #0d1c34 100%);
+                radial-gradient(circle at 14% 18%, rgba(141, 233, 255, 0.18), transparent 28vw),
+                radial-gradient(circle at 88% 8%, rgba(53, 106, 255, 0.18), transparent 24vw),
+                radial-gradient(circle at 72% 82%, rgba(123, 108, 255, 0.12), transparent 20vw),
+                linear-gradient(135deg, #050914, #0b1325 48%, #060a13);
             overflow-x: hidden;
+            position: relative;
         }
 
-        body::before {
+        body::after {
             content: "";
-            inset: 0;
             position: fixed;
+            inset: 0;
+            z-index: -1;
             pointer-events: none;
             background:
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 26px 26px;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+                linear-gradient(120deg, rgba(2, 6, 16, 0.42), rgba(5, 12, 26, 0.16) 42%, rgba(3, 8, 18, 0.36)),
+                radial-gradient(circle at 50% 0, rgba(141, 233, 255, 0.16), transparent 42%);
         }
 
+        /* ===== Floating particles ===== */
+        .game-particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .game-particles span {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
+            animation: float-up linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ===== Shell ===== */
         .game-shell {
+            position: relative;
+            z-index: 1;
             margin: 0 auto;
-            max-width: 1240px;
-            padding: 24px 26px 56px;
+            max-width: 1280px;
+            padding: 28px 28px 64px;
         }
 
-        .game-nav {
-            align-items: center;
+        /* ===== Top nav ===== */
+        .game-topbar {
             display: flex;
-            gap: 18px;
+            align-items: center;
             justify-content: space-between;
-            margin-bottom: 34px;
+            margin-bottom: 48px;
+            gap: 20px;
         }
 
-        .game-brand,
-        .game-nav-links a {
-            align-items: center;
-            color: #e8f7ff;
+        .game-topbar-brand {
             display: inline-flex;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .game-brand {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .game-nav-links {
             align-items: center;
-            background: rgba(8, 18, 34, 0.56);
-            border: 1px solid rgba(129, 210, 255, 0.22);
-            border-radius: 999px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            justify-content: flex-end;
-            padding: 7px;
-            -webkit-backdrop-filter: blur(16px);
-            backdrop-filter: blur(16px);
+            gap: 10px;
+            text-decoration: none;
+            color: rgba(247, 252, 255, 0.95);
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease;
         }
 
-        .game-nav-links a {
-            border-radius: 999px;
-            font-size: 14px;
-            font-weight: 800;
-            padding: 8px 11px;
-            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-        }
-
-        .game-nav-links a:hover,
-        .game-nav-links a.active {
-            background: rgba(141, 233, 255, 0.16);
-            color: #9fe8ff;
+        .game-topbar-brand:hover {
             transform: translateY(-1px);
         }
 
-        .game-back {
+        .game-topbar-brand .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #70d8ff, #b899ff);
+            box-shadow: 0 0 14px rgba(112, 216, 255, 0.5);
+        }
+
+        .game-topbar-links {
+            display: flex;
             align-items: center;
-            background: rgba(12, 22, 40, 0.7);
-            border: 1px solid rgba(129, 210, 255, 0.24);
+            gap: 4px;
+            padding: 6px;
+            background: var(--game-glass);
+            border: 1px solid var(--game-glass-border);
             border-radius: 999px;
-            color: #d7efff;
-            display: inline-flex;
-            gap: 8px;
-            padding: 11px 16px;
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            backdrop-filter: blur(16px) saturate(150%);
+        }
+
+        .game-topbar-links a {
+            position: relative;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(225, 241, 255, 0.78);
             text-decoration: none;
-            -webkit-backdrop-filter: blur(14px);
-            backdrop-filter: blur(14px);
+            letter-spacing: 0.02em;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
-        .game-title-wrap {
-            margin-bottom: 30px;
-            text-align: left;
+        .game-topbar-links a:hover {
+            background: var(--game-glass-hover);
+            color: #fff;
         }
 
-        .game-kicker {
-            color: #8de9ff;
+        .game-topbar-links a.active {
+            background: rgba(141, 233, 255, 0.18);
+            color: #fff;
+        }
+
+        /* ===== Hero header ===== */
+        .game-hero {
+            position: relative;
+            margin-bottom: 52px;
+            padding: 48px 44px;
+            border-radius: 28px;
+            background: var(--game-glass);
+            border: 1px solid var(--game-glass-border);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            backdrop-filter: blur(20px) saturate(140%);
+            overflow: hidden;
+        }
+
+        .game-hero::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            right: -10%;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(112, 216, 255, 0.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        .game-hero::after {
+            content: "";
+            position: absolute;
+            bottom: -40%;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(184, 153, 255, 0.08), transparent 70%);
+            pointer-events: none;
+        }
+
+        .game-hero-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
             font-size: 12px;
             font-weight: 800;
-            letter-spacing: 0.16em;
-            margin-bottom: 10px;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
+            color: rgba(190, 226, 255, 0.7);
         }
 
-        .game-title {
-            font-size: clamp(34px, 5vw, 64px);
+        .game-hero-kicker::before {
+            content: "";
+            width: 20px;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(112, 216, 255, 0.6), rgba(184, 153, 255, 0.4));
+        }
+
+        .game-hero-title {
+            margin: 0 0 14px;
+            font-size: clamp(36px, 5.5vw, 72px);
             font-weight: 900;
-            letter-spacing: 0.02em;
-            margin: 0 0 12px;
-            text-shadow: 0 0 18px rgba(80, 184, 255, 0.26);
+            letter-spacing: 0.01em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 0%, #b8e8ff 40%, #d4b8ff 70%, #ffffff 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 6s ease-in-out infinite;
         }
 
-        .game-desc {
-            color: rgba(224, 241, 255, 0.78);
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .game-hero-desc {
+            margin: 0;
+            max-width: 38em;
             font-size: 16px;
             line-height: 1.8;
-            margin: 0;
-            max-width: 44em;
+            color: rgba(220, 238, 255, 0.72);
         }
 
+        .game-hero-desc em {
+            font-style: normal;
+            color: rgba(255, 212, 153, 0.9);
+            font-weight: 700;
+        }
+
+        /* ===== Grid ===== */
         .game-grid {
             display: grid;
-            gap: 22px;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
 
+        /* ===== Card ===== */
         .game-card {
-            background: rgba(11, 23, 42, 0.7);
-            border: 1px solid rgba(129, 210, 255, 0.24);
-            border-radius: 28px;
-            color: inherit;
-            display: block;
-            min-height: 320px;
-            overflow: hidden;
             position: relative;
+            display: block;
+            overflow: hidden;
+            border-radius: var(--game-radius);
+            background: var(--game-glass);
+            border: 1px solid var(--game-glass-border);
             text-decoration: none;
-            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
+            color: inherit;
+            transition: transform 0.28s cubic-bezier(.2, .8, .2, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+            -webkit-backdrop-filter: blur(16px) saturate(138%);
+            backdrop-filter: blur(16px) saturate(138%);
+        }
+
+        .game-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 60%);
+            pointer-events: none;
         }
 
         .game-card:hover {
-            border-color: rgba(151, 228, 255, 0.5);
-            box-shadow: 0 26px 60px rgba(0, 0, 0, 0.28), 0 0 30px rgba(82, 194, 255, 0.15);
-            transform: translateY(-8px);
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.15),
+                0 0 40px rgba(112, 216, 255, 0.06);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-card-inner {
+            position: relative;
+            z-index: 1;
         }
 
         .game-card-media {
-            align-items: center;
-            display: flex;
-            height: 220px;
-            justify-content: center;
-            overflow: hidden;
             position: relative;
+            height: 210px;
+            overflow: hidden;
         }
 
         .game-card-media::after {
             content: "";
-            inset: 0;
             position: absolute;
-            background: linear-gradient(to top, rgba(8, 16, 30, 0.35), transparent 40%);
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 50%);
+            z-index: 1;
         }
 
         .game-card-cover {
             display: block;
+            width: 100%;
             height: 100%;
             object-fit: cover;
-            position: relative;
-            width: 100%;
-            z-index: 1;
+            transition: transform 0.4s ease;
+        }
+
+        .game-card:hover .game-card-cover {
+            transform: scale(1.04);
+        }
+
+        .game-card-cover-contain {
+            object-fit: contain;
+            object-position: center;
+            padding: 6px 8px 0;
+            background:
+                radial-gradient(circle at 50% 12%, rgba(141, 233, 255, 0.12), transparent 38%),
+                linear-gradient(180deg, rgba(8, 16, 30, 0.94), rgba(10, 18, 36, 1));
+        }
+
+        .game-card-cover-contain,
+        .game-card:hover .game-card-cover-contain {
+            transform: none;
+        }
+
+        .game-card-media-air-writing {
+            height: 248px;
+            background:
+                linear-gradient(180deg, rgba(6, 12, 24, 0.84), rgba(7, 13, 26, 0.98)),
+                radial-gradient(circle at 50% 8%, rgba(141, 233, 255, 0.08), transparent 42%);
+        }
+
+        .game-card-media-air-writing::after {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.18) 0%, transparent 38%);
         }
 
         .game-card-badge {
-            background: rgba(255, 255, 255, 0.88);
-            border-radius: 999px;
-            color: #12395e;
-            font-size: 12px;
-            font-weight: 900;
-            left: 16px;
-            letter-spacing: 0.08em;
-            padding: 7px 10px;
             position: absolute;
-            text-transform: uppercase;
-            top: 16px;
+            top: 14px;
+            left: 14px;
             z-index: 2;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #1a1a2e;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .game-card-info {
-            padding: 18px 20px 22px;
+            padding: 20px 22px 24px;
         }
 
         .game-card-info h3 {
-            font-size: 26px;
-            margin: 0 0 10px;
+            margin: 0 0 8px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
         }
 
         .game-card-info p {
-            color: rgba(226, 241, 255, 0.78);
+            margin: 0 0 16px;
+            color: rgba(247, 252, 255, 0.62);
+            font-size: 14px;
             line-height: 1.75;
-            margin: 0 0 14px;
         }
 
         .game-card-info p a {
-            color: #9ff0ff;
-            font-weight: 900;
+            color: rgba(184, 232, 255, 0.9);
+            font-weight: 700;
             text-decoration: none;
+            transition: color 0.15s ease;
         }
 
         .game-card-info p a:hover {
-            text-decoration: underline;
+            color: #fff;
         }
 
         .game-card-action {
-            color: #98ecff;
-            display: inline-block;
-            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
             font-weight: 800;
-            letter-spacing: 0.08em;
-            text-decoration: none;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease, gap 0.2s ease;
         }
 
-        .game-card-hand {
-            height: 150px;
-            position: relative;
-            width: 150px;
-            z-index: 1;
+        .game-card:hover .game-card-action {
+            color: rgba(184, 232, 255, 0.85);
+            gap: 10px;
         }
 
-        .game-card-hand-palm {
-            background: linear-gradient(145deg, #ffe082 0%, #ffca28 55%, #f0b400 100%);
-            border-radius: 44px;
-            bottom: 0;
-            box-shadow: inset 0 -12px 24px rgba(0, 0, 0, 0.08);
-            height: 94px;
-            left: 28px;
-            position: absolute;
-            width: 92px;
-        }
-
-        .game-card-hand-finger {
-            background: linear-gradient(145deg, #fff09a 0%, #ffd54f 62%, #f7b500 100%);
-            border-radius: 28px;
-            position: absolute;
-            transform-origin: bottom center;
-            width: 20px;
-        }
-
-        .game-card-hand-finger::after {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 999px;
-            content: "";
-            inset: 8px 4px 16px;
-            position: absolute;
-        }
-
-        .finger-1 {
-            height: 72px;
-            left: 28px;
-            top: 22px;
-            transform: rotate(-18deg);
-        }
-
-        .finger-2 {
-            height: 92px;
-            left: 50px;
-            top: 6px;
-        }
-
-        .finger-3 {
-            height: 96px;
-            left: 70px;
-            top: 2px;
-        }
-
-        .finger-4 {
-            height: 84px;
-            left: 90px;
-            top: 14px;
-            transform: rotate(10deg);
-        }
-
-        .finger-5 {
-            height: 62px;
-            left: 10px;
-            top: 50px;
-            transform: rotate(-38deg);
-        }
-
+        /* Active card */
         .game-card-active .game-card-media {
             background:
-                radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 42%),
-                linear-gradient(160deg, #58e6df 0%, #a8f6ef 34%, #5bc8ff 100%);
+                radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0) 45%),
+                linear-gradient(160deg, rgba(112, 216, 255, 0.1), rgba(184, 153, 255, 0.06));
         }
 
+        /* Disabled card */
         .game-card-disabled {
-            opacity: 0.7;
+            opacity: 0.45;
             pointer-events: none;
         }
 
         .game-card-disabled .game-card-media {
             background:
-                radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 34%),
-                linear-gradient(145deg, #504e75 0%, #6e7ba6 100%);
+                radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 35%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
         }
 
         .coming-soon {
-            color: #fff;
-            font-size: 28px;
+            position: relative;
+            z-index: 2;
+            font-size: 26px;
             font-weight: 900;
             letter-spacing: 0.06em;
-            position: relative;
             text-transform: uppercase;
-            z-index: 1;
+            color: rgba(255, 255, 255, 0.7);
         }
 
+        /* ===== Hand-drawn illustration ===== */
+        .game-card-hand {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto;
+        }
+
+        .game-card-hand-palm {
+            position: absolute;
+            bottom: 0;
+            left: 26px;
+            width: 88px;
+            height: 90px;
+            border-radius: 40px;
+            background: linear-gradient(145deg, #ffe082, #ffca28 55%, #f0b400);
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .game-card-hand-finger {
+            position: absolute;
+            width: 18px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, #fff09a, #ffd54f 62%, #f7b500);
+            transform-origin: bottom center;
+        }
+
+        .game-card-hand-finger::after {
+            content: "";
+            position: absolute;
+            inset: 8px 3px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .finger-1 { height: 68px; left: 26px; top: 20px; transform: rotate(-18deg); }
+        .finger-2 { height: 88px; left: 46px; top: 4px; }
+        .finger-3 { height: 92px; left: 66px; top: 0; }
+        .finger-4 { height: 80px; left: 86px; top: 12px; transform: rotate(10deg); }
+        .finger-5 { height: 58px; left: 8px; top: 46px; transform: rotate(-38deg); }
+
+        /* ===== Footer ===== */
+        .game-footer {
+            margin-top: 56px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== Responsive ===== */
         @media (max-width: 720px) {
             .game-shell {
-                padding: 24px 16px 40px;
+                padding: 20px 16px 48px;
             }
 
-            .game-nav {
-                align-items: flex-start;
+            .game-topbar {
                 flex-direction: column;
+                align-items: flex-start;
             }
 
-            .game-nav-links {
-                border-radius: 22px;
-                justify-content: flex-start;
+            .game-topbar-links {
                 width: 100%;
+                justify-content: flex-start;
+                border-radius: 18px;
+                overflow-x: auto;
+            }
+
+            .game-hero {
+                padding: 32px 24px;
+                border-radius: 22px;
             }
 
             .game-grid {
                 grid-template-columns: 1fr;
             }
 
-            .game-card {
-                min-height: 0;
+            .game-card-media {
+                height: 180px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Floating particles -->
+    <div class="game-particles" aria-hidden="true">
+        <span style="width:4px;height:4px;left:8%;animation-duration:18s;animation-delay:0s"></span>
+        <span style="width:6px;height:6px;left:22%;animation-duration:22s;animation-delay:3s"></span>
+        <span style="width:3px;height:3px;left:38%;animation-duration:16s;animation-delay:1s"></span>
+        <span style="width:5px;height:5px;left:55%;animation-duration:20s;animation-delay:5s"></span>
+        <span style="width:4px;height:4px;left:70%;animation-duration:24s;animation-delay:2s"></span>
+        <span style="width:3px;height:3px;left:85%;animation-duration:17s;animation-delay:4s"></span>
+        <span style="width:5px;height:5px;left:45%;animation-duration:21s;animation-delay:7s"></span>
+        <span style="width:4px;height:4px;left:15%;animation-duration:19s;animation-delay:6s"></span>
+        <span style="width:3px;height:3px;left:62%;animation-duration:23s;animation-delay:8s"></span>
+        <span style="width:6px;height:6px;left:92%;animation-duration:15s;animation-delay:3s"></span>
+    </div>
+
     <main class="game-shell">
-        <nav class="game-nav" aria-label="博客导航">
-            <a class="game-brand" href="/">0xt5 Blog</a>
-            <div class="game-nav-links">
+        <!-- Top nav -->
+        <nav class="game-topbar" aria-label="博客导航">
+            <a class="game-topbar-brand" href="/">
+                <span class="brand-dot"></span>
+                0xt5 Blog
+            </a>
+            <div class="game-topbar-links">
                 <a href="/">首页</a>
                 <a href="/about/">碎碎念</a>
                 <a href="/categories/">归档</a>
@@ -378,22 +559,28 @@
             </div>
         </nav>
 
-        <section class="game-title-wrap">
-            <div class="game-kicker">0xt5 Game Hub</div>
-            <h1 class="game-title">游戏选择页</h1>
-            <p class="game-desc">欢迎来玩 图个乐子就好啦</p>
+        <!-- Hero header -->
+        <section class="game-hero">
+            <div class="game-hero-inner">
+                <div class="game-hero-kicker">0xt5 ParticleX Hub</div>
+                <h1 class="game-hero-title">粒子 / 手势 / 小实验</h1>
+                <p class="game-hero-desc">这里保留的是 ParticleX 版本的入口页风格，整体更偏深色、科技感和独立实验场的感觉。</p>
+            </div>
         </section>
 
+        <!-- Cards -->
         <section class="game-grid">
             <article class="game-card game-card-guide">
                 <a class="game-card-media" href="/game/tutorial/" aria-label="打开游戏前置教程">
                     <div class="game-card-badge">Guide</div>
                     <img class="game-card-cover" src="/game/assets/tutorial-cover.png" alt="游戏前置教程封面" />
                 </a>
-                <div class="game-card-info">
-                    <h3>游戏前置教程(✪ω✪)</h3>
-                    <p>玩不懂的可以看一下这里，实在玩不懂的在 <a href="/comment/">留言板</a> 留言就好啦(σﾟ∀ﾟ)σ..</p>
-                    <a class="game-card-action" href="/game/tutorial/">Open Guide</a>
+                <div class="game-card-inner">
+                    <div class="game-card-info">
+                        <h3>游戏前置教程(✪ω✪)</h3>
+                        <p>玩不懂的可以看一下这里，实在玩不懂的在 <a href="/comment/">留言板</a> 留言就好啦(σﾟ∀ﾟ)σ..</p>
+                        <a class="game-card-action" href="/game/tutorial/">Open Guide →</a>
+                    </div>
                 </div>
             </article>
 
@@ -402,25 +589,31 @@
                     <div class="game-card-badge">AI</div>
                     <img class="game-card-cover" src="/game/assets/hand-project-cover.png" alt="序章·从粒子里出发封面" />
                 </div>
-                <div class="game-card-info">
-                    <h3>序章·从粒子里出发</h3>
-                    <p>MediaPipe Hands + 粒子 / 取景器 / 3D 牵引，点击后进入独立游戏页。</p>
-                    <div class="game-card-action">Click To Enter</div>
+                <div class="game-card-inner">
+                    <div class="game-card-info">
+                        <h3>序章·从粒子里出发</h3>
+                        <p>MediaPipe Hands + 粒子 / 取景器 / 3D 牵引，点击后进入独立游戏页。</p>
+                        <div class="game-card-action">Click To Enter →</div>
+                    </div>
                 </div>
             </a>
 
-            <div class="game-card game-card-disabled">
-                <div class="game-card-media">
-                    <div class="game-card-badge">Next</div>
-                    <div class="coming-soon">Soon</div>
+            <a class="game-card game-card-active" href="/game/air-writing/index.html">
+                <div class="game-card-media game-card-media-air-writing">
+                    <div class="game-card-badge">New</div>
+                    <img class="game-card-cover game-card-cover-contain" src="/game/assets/air-writing-cover.png" alt="空中写字封面" />
                 </div>
-                <div class="game-card-info">
-                    <h3>下一个项目位</h3>
-                    <p>敬请期待！</p>
-                    <div class="game-card-action">Waiting</div>
+                <div class="game-card-inner">
+                    <div class="game-card-info">
+                        <h3>空中写字</h3>
+                        <p>基于 MediaPipe Hands 的隔空书写页，可以直接在镜头前写字、缩放和清除笔迹。</p>
+                        <div class="game-card-action">Click To Enter →</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </section>
+
+        <div class="game-footer">0xt5 ParticleX Hub · Motion Lab</div>
     </main>
 </body>
 </html>
