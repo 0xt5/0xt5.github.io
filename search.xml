@@ -110,8 +110,8 @@ io.interactive()
     <url>/2026/06/20/somehash/</url>
     <content><![CDATA[<p>拖拖拖拖拖拖拉拉拉拉拉拉的终于结束了somehash这个题</p>
 <p>接下来是临近期末的大速通时代！o(╥﹏╥)o</p>
-<p>如果需要原文件可以给我留言或者直接加我QQ</p>
-<p>或者在QQ邮箱联系：<a href="mailto:&#x33;&#x32;&#x32;&#x39;&#51;&#55;&#51;&#57;&#x38;&#50;&#x40;&#x71;&#113;&#46;&#99;&#x6f;&#x6d;">3229373982@qq.com</a><br>看到肯定会回的</p>
+<p>如果需要原文件可以给我留言</p>
+<p>或者在<a class="copy-email-link" href="#" data-email="3229373982@qq.com">QQ邮箱</a>联系<br>看到肯定会回的</p>
 <h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>拿到题目之后 先放入ida 然后checksec</p>
 <p>保护全开</p>
 <p><img src="/images/somehash/image-20260610101435489.png" alt="image-20260610101435489"></p>

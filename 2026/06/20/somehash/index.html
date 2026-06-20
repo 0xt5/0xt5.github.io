@@ -46,7 +46,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.css?v=20260526-links-fix" />
+<link rel="stylesheet" href="/css/main.css?v=20260620-giscus-polish" />
 
 <meta name="generator" content="Hexo 8.1.2"></head>
 <body>
@@ -292,8 +292,8 @@
     <div class="content" v-pre>
         <p>拖拖拖拖拖拖拉拉拉拉拉拉的终于结束了somehash这个题</p>
 <p>接下来是临近期末的大速通时代！o(╥﹏╥)o</p>
-<p>如果需要原文件可以给我留言或者直接加我QQ</p>
-<p>或者在QQ邮箱联系：<a href="mailto:&#x33;&#x32;&#x32;&#x39;&#51;&#55;&#51;&#57;&#x38;&#50;&#x40;&#x71;&#113;&#46;&#99;&#x6f;&#x6d;">3229373982@qq.com</a><br>看到肯定会回的</p>
+<p>如果需要原文件可以给我留言</p>
+<p>或者在<a class="copy-email-link" href="#" data-email="3229373982@qq.com">QQ邮箱</a>联系<br>看到肯定会回的</p>
 <h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>拿到题目之后 先放入ida 然后checksec</p>
 <p>保护全开</p>
 <p><img src="/images/somehash/image-20260610101435489.png" alt="image-20260610101435489"></p>
@@ -631,22 +631,57 @@ io.interactive()
     <script src="/js/particlex-main.js"></script>
     
     
-<script
-    src="https://giscus.app/client.js"
-    data-repo="0xt5/0xt5.github.io"
-    data-repo-id="R_kgDOSjkfWg"
-    data-category="Announcements"
-    data-category-id="DIC_kwDOSjkfWs4C_iFg"
-    data-mapping="pathname"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="bottom"
-    data-theme="preferred_color_scheme"
-    data-lang="zh-CN"
-    crossorigin
-    async
-></script>
+<script>
+    (() => {
+        const container = document.getElementById("giscus-container");
+        if (!container || container.children.length) return;
+
+        window.__particlexGiscusTheme = () =>
+            document.documentElement.getAttribute("data-theme") === "dark"
+                ? "dark"
+                : "light";
+
+        const syncGiscusTheme = () => {
+            const iframe = document.querySelector("iframe.giscus-frame");
+            iframe?.contentWindow?.postMessage(
+                {
+                    giscus: {
+                        setConfig: {
+                            theme: window.__particlexGiscusTheme
+                                ? window.__particlexGiscusTheme()
+                                : "light",
+                        },
+                    },
+                },
+                "https://giscus.app"
+            );
+        };
+
+        const script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.setAttribute("data-repo", "0xt5/0xt5.github.io");
+        script.setAttribute("data-repo-id", "R_kgDOSjkfWg");
+        script.setAttribute("data-category", "Announcements");
+        script.setAttribute("data-category-id", "DIC_kwDOSjkfWs4C_iFg");
+        script.setAttribute("data-mapping", "pathname");
+        script.setAttribute("data-strict", "0");
+        script.setAttribute("data-reactions-enabled", "1");
+        script.setAttribute("data-emit-metadata", "0");
+        script.setAttribute("data-input-position", "bottom");
+        script.setAttribute("data-theme", window.__particlexGiscusTheme());
+        script.setAttribute("data-lang", "zh-CN");
+        script.setAttribute("crossorigin", "anonymous");
+        script.async = true;
+        container.appendChild(script);
+
+        window.__particlexCommentThemeSync = syncGiscusTheme;
+        window.addEventListener("message", (event) => {
+            if (event.origin === "https://giscus.app" && event.data?.giscus) {
+                syncGiscusTheme();
+            }
+        });
+    })();
+</script>
 
 
 
