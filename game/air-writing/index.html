@@ -400,6 +400,131 @@
       font: inherit;
     }
 
+    .startup-layer {
+      align-items: center;
+      display: flex;
+      inset: 0;
+      justify-content: center;
+      padding: 28px;
+      position: fixed;
+      z-index: 30;
+    }
+
+    .startup-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+      max-width: 650px;
+      padding: 36px 34px 32px;
+      text-align: center;
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      backdrop-filter: blur(20px) saturate(140%);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .startup-card.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px) scale(0.98);
+    }
+
+    .startup-badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      color: rgba(247, 252, 255, 0.86);
+      display: inline-flex;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      margin-bottom: 18px;
+      padding: 7px 16px;
+      text-transform: uppercase;
+    }
+
+    .startup-card h1 {
+      background: linear-gradient(135deg, #ffffff, #b8e8ff 50%, #ffffff);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 900;
+      line-height: 1.15;
+      margin: 0 0 16px;
+      animation: startup-shimmer 6s ease-in-out infinite;
+    }
+
+    @keyframes startup-shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .startup-desc {
+      color: rgba(247, 252, 255, 0.7);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.9;
+      margin: 0 auto 24px;
+      max-width: 36em;
+    }
+
+    .hint-list {
+      color: rgba(247, 252, 255, 0.58);
+      font-size: 15px;
+      line-height: 1.9;
+      margin: 0 0 26px;
+      padding: 0;
+    }
+
+    .hint-list li {
+      list-style: none;
+    }
+
+    .action-row {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .start-button {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 230px;
+      padding: 16px 26px;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .start-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+      transform: translateY(-2px);
+    }
+
+    .start-button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+      transform: none;
+    }
+
+    .startup-status {
+      color: rgba(247, 252, 255, 0.62);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.8;
+      margin: 0;
+    }
+
     .selectable {
       position: relative;
       display: inline-flex;
@@ -737,6 +862,19 @@
     }
 
     @media (max-width: 760px) {
+      .startup-card {
+        border-radius: 22px;
+        padding: 28px 20px 24px;
+      }
+
+      .startup-desc {
+        font-size: 15px;
+      }
+
+      .start-button {
+        width: 100%;
+      }
+
       .topbar {
         top: 12px;
         left: 12px;
@@ -797,6 +935,26 @@
     <canvas id="drawCanvas"></canvas>
     <canvas id="fxCanvas"></canvas>
     <canvas id="guideCanvas"></canvas>
+
+    <div class="startup-layer" id="startupLayer">
+      <div class="startup-card" id="startupCard">
+        <div class="startup-badge">Air Writing Lab</div>
+        <h1>第一章·空中写字</h1>
+        <p class="startup-desc">
+          这个页面需要相机权限。点击下方按钮后，允许浏览器访问摄像头，画面启动后就可以在镜头前隔空写字。
+        </p>
+        <ul class="hint-list">
+          <li>食指和中指合拢：开始写字</li>
+          <li>张开整个手掌：打开或关闭工具面板</li>
+          <li>双手食指同时出现：缩放画布</li>
+          <li>启动失败时，会在下方显示具体错误原因</li>
+        </ul>
+        <div class="action-row">
+          <button class="start-button" id="startButton" type="button">启动相机并进入</button>
+        </div>
+        <p class="startup-status" id="startupStatus">准备就绪。点击按钮后，如果浏览器弹窗询问权限，请选择“允许”。</p>
+      </div>
+    </div>
 
     <header class="topbar">
       <div class="brand" aria-live="polite">
@@ -899,7 +1057,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script>
     (() => {
-      const video = document.getElementById("camera");
+      const videoElement = document.getElementById("camera");
       const drawCanvas = document.getElementById("drawCanvas");
       const fxCanvas = document.getElementById("fxCanvas");
       const guideCanvas = document.getElementById("guideCanvas");
@@ -919,6 +1077,10 @@
       const panelState = document.getElementById("panelState");
       const errorBox = document.getElementById("errorBox");
       const errorText = document.getElementById("errorText");
+      const startButton = document.getElementById("startButton");
+      const startupCard = document.getElementById("startupCard");
+      const startupLayer = document.getElementById("startupLayer");
+      const startupStatus = document.getElementById("startupStatus");
 
       const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
       const lerp = (a, b, t) => a + (b - a) * t;
@@ -1080,8 +1242,8 @@
       }
 
       function landmarkToScreen(point) {
-        const videoWidth = video.videoWidth || 640;
-        const videoHeight = video.videoHeight || 480;
+        const videoWidth = videoElement.videoWidth || 640;
+        const videoHeight = videoElement.videoHeight || 480;
         const scale = Math.max(state.width / videoWidth, state.height / videoHeight);
         const drawnWidth = videoWidth * scale;
         const drawnHeight = videoHeight * scale;
@@ -2042,15 +2204,34 @@
         cameraDot.className = "dot busy";
         cameraState.textContent = "不可用";
         statusText.textContent = "启动失败";
+        startupStatus.textContent = message;
       }
 
+      function hideStartup() {
+        if (!startupLayer || !startupCard) return;
+        startupLayer.style.pointerEvents = "none";
+        startupCard.classList.add("hidden");
+        window.setTimeout(() => {
+          startupLayer.style.display = "none";
+        }, 380);
+      }
+
+      let appStarted = false;
+
       async function start() {
+        if (appStarted) return;
+        appStarted = true;
+        startButton.disabled = true;
+        startupStatus.textContent = "正在加载手势识别组件并请求相机权限...";
+        errorBox.hidden = true;
         resizeCanvases();
         updateControlState();
         requestAnimationFrame(renderLoop);
 
         if (!window.Hands || !window.Camera) {
           showError("脚本没有加载成功。请确认浏览器可以访问 jsDelivr CDN，然后重新打开这个 HTML 文件。");
+          startButton.disabled = false;
+          appStarted = false;
           return;
         }
 
@@ -2068,12 +2249,12 @@
 
         try {
           let processingFrame = false;
-          const camera = new Camera(video, {
+          const camera = new Camera(videoElement, {
             onFrame: async () => {
               if (processingFrame) return;
               processingFrame = true;
               try {
-                await hands.send({ image: video });
+                await hands.send({ image: videoElement });
               } finally {
                 processingFrame = false;
               }
@@ -2085,8 +2266,12 @@
           cameraDot.className = "dot ready";
           cameraState.textContent = "已启动";
           statusText.textContent = "等待手势";
+          startupStatus.textContent = "启动成功。请把手放进画面里开始写字。";
+          hideStartup();
         } catch (error) {
           showError(`浏览器拒绝或无法访问摄像头：${error.message || error}`);
+          startButton.disabled = false;
+          appStarted = false;
         }
       }
 
@@ -2102,7 +2287,9 @@
 
       setupPanelMouseControls();
       setupMouseDrawing();
-      start();
+      resizeCanvases();
+      updateControlState();
+      startButton.addEventListener("click", start);
     })();
   </script>
 </body>
