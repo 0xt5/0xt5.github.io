@@ -7,6 +7,8 @@ mixins.preview = {
     },
     methods: {
         preview() {
+            let pageBehavior = document.getElementById("page-behavior");
+            if (pageBehavior && pageBehavior.dataset.disableImagePreview === "1") return;
             let preview = this.$refs.preview,
                 content = this.$refs.previewContent;
             let images = document.querySelectorAll("img");
