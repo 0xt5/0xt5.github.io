@@ -687,6 +687,14 @@ body::-webkit-scrollbar-track {
 .content {
     transition: opacity 0.25s;
 }
+.content mark {
+    padding: 0.08em 0.32em;
+    border-radius: 0.35em;
+    background: linear-gradient(120deg, rgba(255, 225, 92, 0.52), rgba(255, 176, 59, 0.36));
+    color: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
 .content img,
 .content video,
 .content audio,

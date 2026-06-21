@@ -108,6 +108,63 @@
       pointer-events: none;
     }
 
+    .topbar-left {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .game-back,
+    .launch-state {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid rgba(141, 233, 255, 0.14);
+      border-radius: 999px;
+      background:
+        linear-gradient(135deg, rgba(39, 56, 78, 0.72), rgba(17, 27, 43, 0.7)),
+        rgba(255, 255, 255, 0.035);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 10px 28px rgba(0, 0, 0, 0.24);
+      color: rgba(237, 247, 255, 0.9);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      backdrop-filter: blur(18px) saturate(140%);
+      pointer-events: auto;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .game-back:hover {
+      transform: translateY(-1px);
+      border-color: rgba(141, 233, 255, 0.34);
+      background:
+        linear-gradient(135deg, rgba(53, 76, 104, 0.82), rgba(22, 34, 54, 0.76)),
+        rgba(141, 233, 255, 0.06);
+    }
+
+    .launch-state {
+      gap: 8px;
+      color: rgba(206, 221, 238, 0.88);
+    }
+
+    .launch-state.ready {
+      border-color: rgba(163, 255, 122, 0.22);
+      color: rgba(225, 255, 218, 0.92);
+    }
+
+    .launch-state.failed {
+      border-color: rgba(255, 118, 95, 0.3);
+      color: rgba(255, 215, 208, 0.95);
+    }
+
     .brand,
     .meters {
       display: flex;
@@ -124,6 +181,7 @@
 
     .brand {
       max-width: 620px;
+      display: none;
     }
 
     .mark {
@@ -400,6 +458,18 @@
       font: inherit;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .startup-layer {
       align-items: center;
       display: flex;
@@ -407,6 +477,7 @@
       justify-content: center;
       padding: 28px;
       position: fixed;
+      pointer-events: none;
       z-index: 30;
     }
 
@@ -420,6 +491,7 @@
       text-align: center;
       -webkit-backdrop-filter: blur(20px) saturate(140%);
       backdrop-filter: blur(20px) saturate(140%);
+      pointer-events: auto;
       transition: opacity 0.35s ease, transform 0.35s ease;
     }
 
@@ -509,6 +581,11 @@
       border-color: rgba(255, 255, 255, 0.35);
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
       transform: translateY(-2px);
+    }
+
+    .start-button:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
     }
 
     .start-button:disabled {
@@ -882,9 +959,20 @@
         grid-template-columns: 1fr;
       }
 
-      .brand,
+      .topbar-left,
       .meters {
         width: 100%;
+      }
+
+      .topbar-left {
+        gap: 8px;
+      }
+
+      .game-back,
+      .launch-state {
+        min-height: 38px;
+        padding: 0 13px;
+        font-size: 13px;
       }
 
       .meters {
@@ -957,12 +1045,9 @@
     </div>
 
     <header class="topbar">
-      <div class="brand" aria-live="polite">
-        <div class="mark" aria-hidden="true"></div>
-        <div class="brand-title">
-          <strong>隔空写字</strong>
-          <span id="statusText">正在加载 MediaPipe</span>
-        </div>
+      <div class="topbar-left" aria-live="polite">
+        <a class="game-back" href="/game/">返回 game</a>
+        <div class="launch-state" id="launchState">等待启动</div>
       </div>
       <div class="meters">
         <div class="meter"><span id="cameraDot" class="dot warn"></span><span id="cameraState">摄像头</span></div>
@@ -971,6 +1056,8 @@
         <div class="meter"><span id="scaleState">100%</span></div>
       </div>
     </header>
+
+    <span id="statusText" class="sr-only">等待启动</span>
 
     <section id="controlPanel" class="panel" aria-hidden="true">
       <div class="panel-head">
@@ -1068,6 +1155,7 @@
       const panel = document.getElementById("controlPanel");
       const fingerCursor = document.getElementById("fingerCursor");
       const statusText = document.getElementById("statusText");
+      const launchState = document.getElementById("launchState");
       const cameraDot = document.getElementById("cameraDot");
       const cameraState = document.getElementById("cameraState");
       const toolState = document.getElementById("toolState");
@@ -1087,6 +1175,16 @@
       const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
       const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
       const GESTURE_SMOOTHING = 0.72;
+      let appStarted = false;
+      let appStarting = false;
+      const isInteractive = () => appStarted;
+
+      function setLaunchState(text, mode = "idle") {
+        launchState.textContent = text;
+        launchState.classList.toggle("ready", mode === "ready");
+        launchState.classList.toggle("failed", mode === "failed");
+      }
+
       const PRESET_DOODLES = {
         hexagram: [
           Array.from({ length: 52 }, (_, i) => {
@@ -1814,6 +1912,11 @@
       }
 
       function handleWriting(hand) {
+        if (!isInteractive()) {
+          endGestureStroke();
+          return;
+        }
+
         if (!hand || state.panelOpen || state.hands.length > 1 || state.draggingPreset) {
           endGestureStroke();
           return;
@@ -1845,6 +1948,10 @@
         const pointerToWorld = (event) => screenToWorld({ x: event.clientX, y: event.clientY });
 
         window.addEventListener("pointerdown", (event) => {
+          if (!isInteractive()) {
+            return;
+          }
+
           if (event.button !== 0 || state.panelOpen) {
             return;
           }
@@ -1870,6 +1977,10 @@
         });
 
         window.addEventListener("pointermove", (event) => {
+          if (!isInteractive()) {
+            return;
+          }
+
           if (state.draggingPreset && event.pointerId === state.draggingPreset.pointerId) {
             const nextPoint = pointerToWorld(event);
             const dx = nextPoint.x - state.draggingPreset.lastPoint.x;
@@ -1893,6 +2004,10 @@
         });
 
         const stopMouseDrawing = (event) => {
+          if (!isInteractive()) {
+            return;
+          }
+
           if (state.draggingPreset && event.pointerId === state.draggingPreset.pointerId) {
             state.draggingPreset = null;
             statusText.textContent = "预设涂鸦已移动";
@@ -2204,6 +2319,7 @@
         cameraDot.className = "dot busy";
         cameraState.textContent = "不可用";
         statusText.textContent = "启动失败";
+        setLaunchState("启动失败", "failed");
         startupStatus.textContent = message;
       }
 
@@ -2216,12 +2332,11 @@
         }, 380);
       }
 
-      let appStarted = false;
-
       async function start() {
-        if (appStarted) return;
-        appStarted = true;
+        if (appStarted || appStarting) return;
+        appStarting = true;
         startButton.disabled = true;
+        setLaunchState("启动中");
         startupStatus.textContent = "正在加载手势识别组件并请求相机权限...";
         errorBox.hidden = true;
         resizeCanvases();
@@ -2231,7 +2346,7 @@
         if (!window.Hands || !window.Camera) {
           showError("脚本没有加载成功。请确认浏览器可以访问 jsDelivr CDN，然后重新打开这个 HTML 文件。");
           startButton.disabled = false;
-          appStarted = false;
+          appStarting = false;
           return;
         }
 
@@ -2263,14 +2378,19 @@
             height: 480
           });
           await camera.start();
+          appStarted = true;
+          appStarting = false;
+          clearWriting();
           cameraDot.className = "dot ready";
           cameraState.textContent = "已启动";
           statusText.textContent = "等待手势";
+          setLaunchState("摄像头已启动", "ready");
           startupStatus.textContent = "启动成功。请把手放进画面里开始写字。";
           hideStartup();
         } catch (error) {
           showError(`浏览器拒绝或无法访问摄像头：${error.message || error}`);
           startButton.disabled = false;
+          appStarting = false;
           appStarted = false;
         }
       }
