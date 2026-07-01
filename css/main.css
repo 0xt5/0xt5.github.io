@@ -921,6 +921,7 @@ body::-webkit-scrollbar-track {
     display: grid;
     gap: 22px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    perspective: 1100px;
 }
 .article .content .links-grid-compact {
     align-items: stretch;
@@ -940,25 +941,38 @@ body::-webkit-scrollbar-track {
     padding: 18px 20px;
     position: relative;
     text-decoration: none;
-    transition: background 0.28s, border-color 0.28s, box-shadow 0.28s, transform 0.28s;
+    transform:
+        perspective(980px)
+        translateY(var(--link-lift, 0))
+        scale(var(--link-scale, 1))
+        rotateX(var(--link-rotate-x, 0deg))
+        rotateY(var(--link-rotate-y, 0deg));
+    transform-style: preserve-3d;
+    transition: background 0.28s, border-color 0.28s, box-shadow 0.28s, transform 0.18s ease-out;
     width: 100%;
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
     animation: link-card-breathe 3.4s ease-in-out infinite;
 }
 .article .content a.link-card::after {
-    background: radial-gradient(circle, rgba(113, 203, 255, 0.2), transparent 62%);
+    background:
+        radial-gradient(
+            circle at var(--link-glow-x, 70%) var(--link-glow-y, 72%),
+            rgba(113, 203, 255, 0.34),
+            rgba(190, 225, 255, 0.14) 34%,
+            transparent 66%
+        );
     border-radius: 999px;
-    bottom: -32px;
+    bottom: -42px;
     content: "";
-    height: 86px;
+    height: 120px;
     opacity: 0;
     pointer-events: none;
     position: absolute;
-    right: -24px;
+    right: -38px;
     transform: scale(0.72);
     transition: opacity 0.32s ease, transform 0.32s ease;
-    width: 86px;
+    width: 120px;
 }
 .article .content a.link-card::before {
     background: linear-gradient(
@@ -983,9 +997,20 @@ body::-webkit-scrollbar-track {
 .article .content a.link-card:hover {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 248, 255, 0.94) 100%);
     border-color: #8ebcfb;
-    box-shadow: 0 26px 48px #abc4ea85, 0 0 0 1px #d9ebff inset, 0 0 28px #8fd0ff7d, 0 0 42px #88c6ff40;
+    box-shadow:
+        var(--link-shadow-x, 0)
+        var(--link-shadow-y, 26px)
+        48px #abc4ea85,
+        0 0 0 1px #d9ebff inset,
+        0 0 28px #8fd0ff7d,
+        0 0 42px #88c6ff40;
     opacity: 1;
-    transform: translateY(-8px);
+    --link-lift: -8px;
+    --link-scale: 1.018;
+}
+.article .content a.link-card.link-card-tilting {
+    animation-play-state: paused;
+    transition: background 0.28s, border-color 0.28s, box-shadow 0.12s ease-out, transform 0.08s ease-out;
 }
 .article .content a.link-card:hover::before {
     animation: link-card-scan 0.78s ease-out 1;
@@ -1004,7 +1029,8 @@ body::-webkit-scrollbar-track {
     flex: 0 0 auto;
     justify-content: center;
     padding: 6px;
-    transition: box-shadow 0.28s ease, transform 0.28s ease;
+    transform: translate3d(var(--link-avatar-x, 0), var(--link-avatar-y, 0), 34px);
+    transition: box-shadow 0.28s ease, transform 0.14s ease-out;
 }
 .article .content img.link-card-avatar {
     border-radius: 18px;
@@ -1019,6 +1045,8 @@ body::-webkit-scrollbar-track {
 }
 .article .content .link-card-body {
     min-width: 0;
+    transform: translate3d(var(--link-body-x, 0), var(--link-body-y, 0), 22px);
+    transition: transform 0.16s ease-out;
     width: 100%;
     z-index: 1;
 }
@@ -1052,7 +1080,13 @@ body::-webkit-scrollbar-track {
 }
 .article .content a.link-card:hover .link-card-avatar-shell {
     box-shadow: inset 0 1px 0 #fff, 0 16px 28px #aec8ee73;
-    transform: translateX(-8px) scale(1.04);
+    transform:
+        translate3d(
+            calc(var(--link-avatar-x, 0px) - 8px),
+            var(--link-avatar-y, 0px),
+            34px
+        )
+        scale(1.04);
 }
 .article .content a.link-card:hover .link-card-body h3 {
     color: #1c5fb8;
@@ -1063,6 +1097,22 @@ body::-webkit-scrollbar-track {
 }
 .article .content a.link-card:hover .link-card-details p {
     color: #465a72;
+}
+@media (prefers-reduced-motion: reduce) {
+    .article .content a.link-card {
+        animation: none;
+        transform: none;
+        transition: none;
+    }
+    .article .content a.link-card::before {
+        animation: none !important;
+    }
+    .article .content .link-card-avatar-shell,
+    .article .content .link-card-body,
+    .article .content a.link-card:hover .link-card-avatar-shell {
+        transform: none;
+        transition: none;
+    }
 }
 ::-webkit-scrollbar {
     height: 12px;
@@ -1416,9 +1466,17 @@ ol li {
     .article .content a.link-card {
         min-height: 0;
         padding: 16px 18px;
+        transform: none;
     }
     .article .content .link-card-avatar-shell {
         padding: 5px;
+        transform: none;
+    }
+    .article .content a.link-card:hover .link-card-avatar-shell {
+        transform: none;
+    }
+    .article .content .link-card-body {
+        transform: none;
     }
     .article .content img.link-card-avatar {
         height: 64px !important;

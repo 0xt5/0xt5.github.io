@@ -28,6 +28,7 @@ const app = Vue.createApp({
         this.initTabTitleSwap();
         this.initHomeTyped();
         this.initHomeOrbit();
+        this.initLinkCardParallax();
     },
     methods: {
         initColorTheme() {
@@ -714,6 +715,66 @@ const app = Vue.createApp({
                 window.removeEventListener("resize", resizeCanvas);
                 resizeObserver?.disconnect();
             };
+        },
+        initLinkCardParallax() {
+            if (document.body.dataset.linkCardParallaxBound === "1") return;
+            if (window.matchMedia?.("(pointer: coarse)").matches) return;
+            if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+            const cards = Array.from(document.querySelectorAll(".article .content a.link-card"));
+            if (!cards.length) return;
+
+            document.body.dataset.linkCardParallaxBound = "1";
+            const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+            cards.forEach((card) => {
+                let rect = null;
+
+                const reset = () => {
+                    card.classList.remove("link-card-tilting");
+                    [
+                        "--link-rotate-x",
+                        "--link-rotate-y",
+                        "--link-avatar-x",
+                        "--link-avatar-y",
+                        "--link-body-x",
+                        "--link-body-y",
+                        "--link-glow-x",
+                        "--link-glow-y",
+                        "--link-shadow-x",
+                        "--link-shadow-y",
+                    ].forEach((name) => card.style.removeProperty(name));
+                };
+
+                card.addEventListener("pointerenter", () => {
+                    rect = card.getBoundingClientRect();
+                    card.classList.add("link-card-tilting");
+                });
+
+                card.addEventListener("pointermove", (event) => {
+                    if (!rect) rect = card.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const rawX = event.clientX - centerX;
+                    const rawY = event.clientY - centerY;
+                    const nx = clamp(rawX / (rect.width / 2), -1, 1);
+                    const ny = clamp(rawY / (rect.height / 2), -1, 1);
+
+                    card.style.setProperty("--link-rotate-y", `${nx * 13}deg`);
+                    card.style.setProperty("--link-rotate-x", `${-ny * 10}deg`);
+                    card.style.setProperty("--link-avatar-x", `${nx * 15}px`);
+                    card.style.setProperty("--link-avatar-y", `${ny * 11}px`);
+                    card.style.setProperty("--link-body-x", `${nx * 7}px`);
+                    card.style.setProperty("--link-body-y", `${ny * 5}px`);
+                    card.style.setProperty("--link-glow-x", `${50 + nx * 36}%`);
+                    card.style.setProperty("--link-glow-y", `${50 + ny * 42}%`);
+                    card.style.setProperty("--link-shadow-x", `${-nx * 24}px`);
+                    card.style.setProperty("--link-shadow-y", `${20 - ny * 14}px`);
+                });
+
+                card.addEventListener("pointerleave", reset);
+                card.addEventListener("blur", reset);
+            });
         },
         handleScroll() {
             let wrap = this.$refs.homePostsWrap;
