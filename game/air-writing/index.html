@@ -1177,7 +1177,51 @@
       const GESTURE_SMOOTHING = 0.72;
       let appStarted = false;
       let appStarting = false;
+      let activeCamera = null;
+      let activeHandsProcessor = null;
+      let renderFrameId = 0;
+      let renderLoopStarted = false;
+      const landmarkHistory = new Map();
       const isInteractive = () => appStarted;
+
+      function smoothDetectedHands(results) {
+        const hands = results.multiHandLandmarks || [];
+        const handedness = results.multiHandedness || [];
+        const activeKeys = new Set();
+
+        const smoothedHands = hands.map((hand, handIndex) => {
+          const key = handedness[handIndex]?.label || `hand-${handIndex}`;
+          activeKeys.add(key);
+          const previous = landmarkHistory.get(key);
+
+          if (!previous || previous.length !== hand.length) {
+            const initial = hand.map((point) => ({ ...point }));
+            landmarkHistory.set(key, initial);
+            return initial;
+          }
+
+          const smoothed = hand.map((point, pointIndex) => {
+            const old = previous[pointIndex];
+            const movement = Math.hypot(point.x - old.x, point.y - old.y);
+            const alpha = movement > 0.022 ? 0.84 : 0.64;
+            return {
+              ...point,
+              x: old.x + (point.x - old.x) * alpha,
+              y: old.y + (point.y - old.y) * alpha,
+              z: old.z + (point.z - old.z) * alpha
+            };
+          });
+
+          landmarkHistory.set(key, smoothed);
+          return smoothed;
+        });
+
+        for (const key of landmarkHistory.keys()) {
+          if (!activeKeys.has(key)) landmarkHistory.delete(key);
+        }
+
+        return smoothedHands;
+      }
 
       function setLaunchState(text, mode = "idle") {
         launchState.textContent = text;
@@ -1310,6 +1354,7 @@
 
         state.renderedScale = null;
         state.drawingDirty = true;
+        if (state.panelOpen) window.requestAnimationFrame(refreshSelectableRects);
       }
 
       function setCanvasSpace(ctx) {
@@ -1455,6 +1500,11 @@
         state.hoverStart = 0;
         state.lastActivated = null;
         clearHoverStyles();
+        if (open) {
+          window.requestAnimationFrame(refreshSelectableRects);
+        } else {
+          selectableRects = [];
+        }
       }
 
       function updateControlState() {
@@ -1686,8 +1736,18 @@
         updateControlState();
       }
 
+      const selectableControls = Array.from(panel.querySelectorAll("[data-selectable]"));
+      let selectableRects = [];
+
+      function refreshSelectableRects() {
+        selectableRects = selectableControls.map((el) => ({
+          el,
+          rect: el.getBoundingClientRect()
+        }));
+      }
+
       function setupPanelMouseControls() {
-        panel.querySelectorAll("[data-selectable]").forEach((el) => {
+        selectableControls.forEach((el) => {
           el.addEventListener("click", () => {
             applyPanelAction(el);
             state.lastActivated = el;
@@ -1696,9 +1756,12 @@
       }
 
       function getSelectableAt(point) {
-        const controls = panel.querySelectorAll("[data-selectable]");
-        for (const el of controls) {
-          const rect = el.getBoundingClientRect();
+        if (selectableRects.length !== selectableControls.length) {
+          refreshSelectableRects();
+        }
+
+        for (const item of selectableRects) {
+          const { el, rect } = item;
           if (
             point.x >= rect.left &&
             point.x <= rect.right &&
@@ -2292,16 +2355,31 @@
       }
 
       function renderLoop(now) {
+        if (!renderLoopStarted) return;
+        if (document.hidden) {
+          state.lastFrameTime = now;
+          renderFrameId = requestAnimationFrame(renderLoop);
+          return;
+        }
+
         const dt = clamp(now - state.lastFrameTime, 8, 40);
         state.lastFrameTime = now;
         renderDrawing();
         renderParticles(dt, now);
         drawHandGuide();
-        requestAnimationFrame(renderLoop);
+        renderFrameId = requestAnimationFrame(renderLoop);
+      }
+
+      function ensureRenderLoop() {
+        if (renderLoopStarted) return;
+        renderLoopStarted = true;
+        state.lastFrameTime = performance.now();
+        renderFrameId = requestAnimationFrame(renderLoop);
       }
 
       function onResults(results) {
-        state.hands = (results.multiHandLandmarks || []).map((landmarks, index) => analyzeHand(landmarks, index));
+        if (document.hidden) return;
+        state.hands = smoothDetectedHands(results).map((landmarks, index) => analyzeHand(landmarks, index));
         const now = performance.now();
         if (state.hands.length) {
           cameraDot.className = "dot ready";
@@ -2332,6 +2410,23 @@
         }, 380);
       }
 
+      function releaseExperience() {
+        appStarted = false;
+        appStarting = false;
+        activeCamera?.stop();
+        activeCamera = null;
+        const handsToClose = activeHandsProcessor;
+        activeHandsProcessor = null;
+        if (handsToClose?.close) {
+          Promise.resolve(handsToClose.close()).catch(() => {});
+        }
+        renderLoopStarted = false;
+        cancelAnimationFrame(renderFrameId);
+        renderFrameId = 0;
+        landmarkHistory.clear();
+        state.hands = [];
+      }
+
       async function start() {
         if (appStarted || appStarting) return;
         appStarting = true;
@@ -2341,7 +2436,6 @@
         errorBox.hidden = true;
         resizeCanvases();
         updateControlState();
-        requestAnimationFrame(renderLoop);
 
         if (!window.Hands || !window.Camera) {
           showError("脚本没有加载成功。请确认浏览器可以访问 jsDelivr CDN，然后重新打开这个 HTML 文件。");
@@ -2353,6 +2447,8 @@
         const hands = new Hands({
           locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
         });
+        activeHandsProcessor = hands;
+        ensureRenderLoop();
 
         hands.setOptions({
           maxNumHands: 2,
@@ -2366,7 +2462,7 @@
           let processingFrame = false;
           const camera = new Camera(videoElement, {
             onFrame: async () => {
-              if (processingFrame) return;
+              if (document.hidden || processingFrame) return;
               processingFrame = true;
               try {
                 await hands.send({ image: videoElement });
@@ -2377,6 +2473,7 @@
             width: 640,
             height: 480
           });
+          activeCamera = camera;
           await camera.start();
           appStarted = true;
           appStarting = false;
@@ -2390,11 +2487,20 @@
         } catch (error) {
           showError(`浏览器拒绝或无法访问摄像头：${error.message || error}`);
           startButton.disabled = false;
-          appStarting = false;
-          appStarted = false;
+          releaseExperience();
         }
       }
 
+      document.addEventListener("visibilitychange", () => {
+        if (!appStarted) return;
+        if (document.hidden) {
+          videoElement.pause();
+        } else {
+          state.lastFrameTime = performance.now();
+          videoElement.play().catch(() => {});
+        }
+      });
+      window.addEventListener("pagehide", releaseExperience, { once: true });
       window.addEventListener("resize", resizeCanvases);
       window.addEventListener("keydown", (event) => {
         if (event.key.toLowerCase() === "c") {

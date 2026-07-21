@@ -378,6 +378,47 @@
             };
         }
 
+        const landmarkHistory = new Map();
+
+        function smoothHandLandmarks(results) {
+            const hands = results.multiHandLandmarks || [];
+            const handedness = results.multiHandedness || [];
+            const activeKeys = new Set();
+
+            const smoothedHands = hands.map((hand, handIndex) => {
+                const key = handedness[handIndex]?.label || `hand-${handIndex}`;
+                activeKeys.add(key);
+                const previous = landmarkHistory.get(key);
+
+                if (!previous || previous.length !== hand.length) {
+                    const initial = hand.map((point) => ({ ...point }));
+                    landmarkHistory.set(key, initial);
+                    return initial;
+                }
+
+                const smoothed = hand.map((point, pointIndex) => {
+                    const old = previous[pointIndex];
+                    const movement = Math.hypot(point.x - old.x, point.y - old.y);
+                    const alpha = movement > 0.025 ? 0.82 : 0.58;
+                    return {
+                        ...point,
+                        x: old.x + (point.x - old.x) * alpha,
+                        y: old.y + (point.y - old.y) * alpha,
+                        z: old.z + (point.z - old.z) * alpha
+                    };
+                });
+
+                landmarkHistory.set(key, smoothed);
+                return smoothed;
+            });
+
+            for (const key of landmarkHistory.keys()) {
+                if (!activeKeys.has(key)) landmarkHistory.delete(key);
+            }
+
+            return smoothedHands;
+        }
+
         class BaseMode {
             constructor(canvas, ctx) {
                 this.canvas = canvas;
@@ -1040,6 +1081,25 @@
         }
 
         let appStarted = false;
+        let activeStream = null;
+        let activeHands = null;
+        let inferenceFrameId = 0;
+
+        function releaseExperience() {
+            appStarted = false;
+            window.cancelAnimationFrame(inferenceFrameId);
+            inferenceFrameId = 0;
+            activeStream?.getTracks().forEach((track) => track.stop());
+            activeStream = null;
+            videoElement.srcObject = null;
+            landmarkHistory.clear();
+
+            const handsToClose = activeHands;
+            activeHands = null;
+            if (handsToClose?.close) {
+                Promise.resolve(handsToClose.close()).catch(() => {});
+            }
+        }
 
         async function startExperience() {
             if (appStarted) return;
@@ -1060,6 +1120,7 @@
 
             try {
                 resizeCanvas();
+                const isMobileViewport = Math.min(window.innerWidth, window.innerHeight) <= 720;
 
                 const controller = new MainController(canvasElement, canvasCtx, videoElement);
                 controller
@@ -1075,24 +1136,25 @@
                 const hands = new Hands({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
                 });
+                activeHands = hands;
 
                 hands.setOptions({
                     maxNumHands: 2,
-                    modelComplexity: 1,
-                    minDetectionConfidence: 0.7,
-                    minTrackingConfidence: 0.5
+                    modelComplexity: isMobileViewport ? 0 : 1,
+                    minDetectionConfidence: 0.6,
+                    minTrackingConfidence: 0.65
                 });
 
                 hands.onResults((results) => {
+                    if (!appStarted || document.hidden) return;
                     canvasCtx.save();
                     canvasCtx.translate(canvasElement.width, 0);
                     canvasCtx.scale(-1, 1);
-                    controller.onFrame(results.multiHandLandmarks);
+                    controller.onFrame(smoothHandLandmarks(results));
                     canvasCtx.restore();
                     controller.drawHUD();
                 });
 
-                const isMobileViewport = Math.min(window.innerWidth, window.innerHeight) <= 720;
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     throw new Error("当前浏览器不支持摄像头 API，请换系统浏览器或使用 HTTPS 页面打开");
                 }
@@ -1112,6 +1174,7 @@
                     },
                 });
 
+                activeStream = stream;
                 videoElement.srcObject = stream;
                 videoElement.muted = true;
                 videoElement.playsInline = true;
@@ -1126,7 +1189,7 @@
                 let sendingFrame = false;
                 const sendFrame = async () => {
                     if (!appStarted) return;
-                    if (!sendingFrame && videoElement.readyState >= 2) {
+                    if (!document.hidden && !sendingFrame && videoElement.readyState >= 2) {
                         sendingFrame = true;
                         try {
                             await hands.send({ image: videoElement });
@@ -1136,21 +1199,32 @@
                             sendingFrame = false;
                         }
                     }
-                    window.requestAnimationFrame(sendFrame);
+                    inferenceFrameId = window.requestAnimationFrame(sendFrame);
                 };
-                window.requestAnimationFrame(sendFrame);
+                inferenceFrameId = window.requestAnimationFrame(sendFrame);
 
                 setStatus("启动成功。请把手放进画面里开始玩。", "success");
                 setModeText("摄像头已启动", "success");
                 hideStartup();
             } catch (error) {
                 console.error(error);
+                releaseExperience();
                 setStatus(`启动失败：${error && error.message ? error.message : "未知错误"}。请检查相机权限，或者刷新后重试。`, "error");
                 setModeText("启动失败", "error");
                 startButton.disabled = false;
                 appStarted = false;
             }
         }
+
+        document.addEventListener("visibilitychange", () => {
+            if (!appStarted) return;
+            if (document.hidden) {
+                videoElement.pause();
+            } else {
+                videoElement.play().catch(() => {});
+            }
+        });
+        window.addEventListener("pagehide", releaseExperience, { once: true });
 
         startButton.addEventListener("click", startExperience);
     </script>
