@@ -556,7 +556,7 @@
     line-height: 50px;
     position: fixed;
     top: 0;
-    transition: background 0.25s ease-out, top 0.25s ease-out;
+    transition: background 0.25s ease-out, transform 0.25s ease-out;
     width: 100vw;
     z-index: 1004;
 }
@@ -615,7 +615,7 @@
     z-index: 1001;
 }
 #menu.hidden {
-    top: -50px;
+    transform: translateY(-50px);
 }
 #menu.menu-color {
     background: #0003;
@@ -976,23 +976,23 @@ body::-webkit-scrollbar-track {
 }
 .article .content a.link-card::before {
     background: linear-gradient(
-        108deg,
-        rgba(207, 232, 255, 0) 28%,
-        rgba(190, 225, 255, 0.12) 43%,
-        rgba(116, 194, 255, 0.88) 50%,
-        rgba(205, 232, 255, 0.1) 57%,
-        rgba(205, 232, 255, 0) 72%
+        100deg,
+        rgba(190, 225, 255, 0) 0%,
+        rgba(190, 225, 255, 0.08) 30%,
+        rgba(150, 205, 255, 0.26) 50%,
+        rgba(205, 232, 255, 0.08) 70%,
+        rgba(205, 232, 255, 0) 100%
     );
     content: "";
-    height: 220%;
-    left: -46%;
+    height: 200%;
+    left: -55%;
     opacity: 0;
     pointer-events: none;
     position: absolute;
-    top: -56%;
-    transform: rotate(10deg) translateX(-30%);
+    top: -50%;
+    transform: rotate(8deg) translateX(-60%);
     transition: opacity 0.22s ease;
-    width: 24%;
+    width: 55%;
 }
 .article .content a.link-card:hover {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 248, 255, 0.94) 100%);
@@ -1333,14 +1333,17 @@ ol li {
 @keyframes link-card-scan {
     0% {
         opacity: 0;
-        transform: rotate(10deg) translateX(-78%);
+        transform: rotate(8deg) translateX(-90%);
     }
-    12% {
+    15% {
+        opacity: 1;
+    }
+    85% {
         opacity: 1;
     }
     100% {
         opacity: 0;
-        transform: rotate(10deg) translateX(470%);
+        transform: rotate(8deg) translateX(280%);
     }
 }
 @keyframes link-card-breathe {
@@ -1605,7 +1608,7 @@ ol li {
     --theme-link-strong: #4f8fd6;
     --theme-shadow: rgba(217, 217, 217, 0.5);
     --theme-shadow-tight: rgba(217, 217, 217, 0.95);
-    --theme-menu-bg: rgba(146, 202, 250, 0.9);
+    --theme-menu-bg: rgba(146, 202, 250, 0.95);
     --theme-menu-fg: #555;
     --theme-menu-fg-hero: #fff;
     --theme-menu-glass: rgba(0, 0, 0, 0.2);
@@ -1645,7 +1648,7 @@ ol li {
     --theme-link-strong: #b9daff;
     --theme-shadow: rgba(1, 8, 18, 0.55);
     --theme-shadow-tight: rgba(0, 0, 0, 0.52);
-    --theme-menu-bg: rgba(8, 15, 25, 0.72);
+    --theme-menu-bg: rgba(8, 15, 25, 0.92);
     --theme-menu-fg: #dce9fb;
     --theme-menu-fg-hero: #fff;
     --theme-menu-glass: rgba(4, 10, 18, 0.5);
@@ -1767,7 +1770,6 @@ a,
 #menu {
     background: var(--theme-menu-bg);
     box-shadow: 0 -1px 10px 0 var(--theme-shadow);
-    backdrop-filter: blur(16px);
 }
 
 #menu #desktop-menu {
@@ -2436,4 +2438,94 @@ table:not(.hljs-ln) th {
 
 ::-webkit-scrollbar-track {
     background: var(--theme-scrollbar-track);
+}
+
+/* rightside floating toolbar */
+#rightside {
+    bottom: 40px;
+    opacity: 0;
+    position: fixed;
+    right: -48px;
+    transition: opacity 0.5s, transform 0.5s;
+    z-index: 200;
+}
+#rightside.rightside-show {
+    opacity: 0.85;
+    transform: translate(-58px, 0);
+}
+#rightside.rightside-show:hover {
+    opacity: 1;
+}
+#rightside #rightside-config-hide {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translate(45px, 0);
+    transition: transform 0.4s;
+}
+#rightside #rightside-config-hide.show {
+    height: auto;
+    opacity: 1;
+    transform: translate(0, 0);
+}
+#rightside #rightside-config-hide.status {
+    height: auto;
+    opacity: 1;
+}
+#rightside button,
+#rightside a {
+    background: #49b1f5;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(73, 177, 245, 0.35);
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-size: 15px;
+    height: 35px;
+    line-height: 35px;
+    margin-bottom: 5px;
+    text-align: center;
+    transition: background 0.2s;
+    width: 35px;
+}
+#rightside button:hover,
+#rightside a:hover {
+    background: #3a9be0;
+    color: #fff;
+}
+#rightside .scroll-percent {
+    display: none;
+    font-size: 11px;
+    font-weight: 600;
+}
+#rightside #rightside-go-up.show-percent .scroll-percent {
+    display: block;
+}
+#rightside #rightside-go-up.show-percent > i {
+    display: none;
+}
+
+/* single/double column toggle */
+#home-card {
+    min-width: 0;
+    transition: width 0.4s ease, opacity 0.3s ease;
+}
+#home-posts {
+    transition: width 0.4s ease, margin 0.4s ease;
+}
+html.hide-aside #home-card {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+html.hide-aside #home-posts {
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 900px) {
+    #rightside #rightside-hide-aside {
+        display: none;
+    }
 }

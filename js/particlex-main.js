@@ -21,7 +21,10 @@ const app = Vue.createApp({
     },
     mounted() {
         this.initColorTheme();
-        window.addEventListener("scroll", this.handleScroll, true);
+        window.addEventListener("scroll", this.handleScroll, {
+            capture: true,
+            passive: true,
+        });
         this.render();
         this.bindCopyEmail();
         this.applyRandomTagColors();
@@ -673,7 +676,6 @@ const app = Vue.createApp({
             const animate = () => {
                 rafId = window.requestAnimationFrame(animate);
                 time += 0.01;
-                syncCoreMetrics();
                 const cx = coreCenter.x;
                 const cy = coreCenter.y;
 
@@ -709,11 +711,32 @@ const app = Vue.createApp({
                 if (core) resizeObserver.observe(core);
             }
 
+            let orbitVisible = true;
+            let visibilityObserver = null;
+            if ("IntersectionObserver" in window) {
+                visibilityObserver = new IntersectionObserver(
+                    (entries) => {
+                        const visible = entries.some((entry) => entry.isIntersecting);
+                        if (visible === orbitVisible) return;
+                        orbitVisible = visible;
+                        if (visible) {
+                            if (!rafId) animate();
+                        } else if (rafId) {
+                            window.cancelAnimationFrame(rafId);
+                            rafId = 0;
+                        }
+                    },
+                    { threshold: 0 }
+                );
+                visibilityObserver.observe(host);
+            }
+
             window.__particlexOrbitCleanup?.();
             window.__particlexOrbitCleanup = () => {
                 window.cancelAnimationFrame(rafId);
                 window.removeEventListener("resize", resizeCanvas);
                 resizeObserver?.disconnect();
+                visibilityObserver?.disconnect();
             };
         },
         initLinkCardParallax() {
@@ -786,8 +809,11 @@ const app = Vue.createApp({
             if (wrap) {
                 if (newScrollTop <= window.innerHeight - 100) this.menuColor = true;
                 else this.menuColor = false;
-                if (newScrollTop <= 400) wrap.style.top = "-" + newScrollTop / 5 + "px";
-                else wrap.style.top = "-80px";
+                const wrapTop = newScrollTop <= 400 ? "-" + newScrollTop / 5 + "px" : "-80px";
+                if (this._lastWrapTop !== wrapTop) {
+                    wrap.style.top = wrapTop;
+                    this._lastWrapTop = wrapTop;
+                }
             }
             this.scrollTop = newScrollTop;
         },

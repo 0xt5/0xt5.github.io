@@ -42,7 +42,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.css?v=20260701-link-parallax" />
+<link rel="stylesheet" href="/css/main.css?v=20260829-aside2" />
 
 <meta name="generator" content="Hexo 8.1.2"></head>
 <body>
@@ -62,6 +62,11 @@
                     : "light";
             };
             root.setAttribute("data-theme", getPreferredTheme());
+            try {
+                if (localStorage.getItem("particlex-aside-status") === "hide") {
+                    root.classList.add("hide-aside");
+                }
+            } catch (e) {}
         })();
     </script>
     <div
@@ -255,10 +260,10 @@
           <div class="links-grid links-grid-compact">
             <a class="link-card link-card-compact-hover" href="https://enp00.github.io/" target="_blank" rel="noopener">
               <div class="link-card-avatar-shell">
-                <img class="link-card-avatar" src="https://enp00.github.io/img/site-avatar.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="enp0" />
+                <img class="link-card-avatar" src="https://enp00.github.io/img/site-avatar.png" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="Fyzen" />
               </div>
               <div class="link-card-body">
-                <h3>enp0</h3>
+                <h3>Fyzen</h3>
                 <div class="link-card-details">
                   <p>pwn大肘子！俺的师傅，有实力！orz了</p>
                 </div>
@@ -291,10 +296,10 @@
 
             <a class="link-card link-card-compact-hover" href="https://qispath.github.io/" target="_blank" rel="noopener">
               <div class="link-card-avatar-shell">
-                <img class="link-card-avatar" src="https://qispath.github.io/images/avatar-profile.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="Qiszy" />
+                <img class="link-card-avatar" src="https://qispath.github.io/images/avatar-profile.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="QisPath" />
               </div>
               <div class="link-card-body">
-                <h3>Qiszy</h3>
+                <h3>QisPath</h3>
                 <div class="link-card-details">
                   <p>有实力！web界新星！</p>
                 </div>
@@ -303,10 +308,10 @@
 
             <a class="link-card link-card-compact-hover" href="https://jackiechen78.github.io/" target="_blank" rel="noopener">
               <div class="link-card-avatar-shell">
-                <img class="link-card-avatar" src="https://jackiechen78.github.io/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="Jackiechen" />
+                <img class="link-card-avatar" src="https://jackiechen78.github.io/img/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/images/avatar.jpg'" alt="Jackie" />
               </div>
               <div class="link-card-body">
-                <h3>Jackiechen</h3>
+                <h3>Jackie</h3>
                 <div class="link-card-details">
                   <p>阿龙！感觉超级自律！上课占位置的神 加油搞项目！</p>
                 </div>
@@ -344,7 +349,29 @@
         </transition>
         
     </div>
-    <script src="/js/particlex-main.js?v=20260701-link-parallax-strong"></script>
+    <div id="rightside">
+    <div id="rightside-config-hide">
+        <button id="rightside-darkmode" type="button" title="浅色和深色模式转换">
+            <i class="fa-solid fa-adjust"></i>
+        </button>
+        
+    </div>
+    <div id="rightside-config-show">
+        <button id="rightside-config" type="button" title="设置">
+            <i class="fa-solid fa-gear fa-spin"></i>
+        </button>
+        <a id="rightside-chat" href="/comment/" title="聊天">
+            <i class="fa-solid fa-sms"></i>
+        </a>
+        <button id="rightside-go-up" type="button" title="回到顶部">
+            <span class="scroll-percent"></span>
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+    </div>
+</div>
+
+    <script src="/js/particlex-main.js?v=20260829-perf2"></script>
+    <script src="/js/rightside.js?v=20260829-5"></script>
     
 </body>
 </html>

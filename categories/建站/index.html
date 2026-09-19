@@ -42,7 +42,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.css?v=20260701-link-parallax" />
+<link rel="stylesheet" href="/css/main.css?v=20260829-aside2" />
 
 <meta name="generator" content="Hexo 8.1.2"></head>
 <body>
@@ -60,6 +60,11 @@
                     : "light";
             };
             root.setAttribute("data-theme", getPreferredTheme());
+            try {
+                if (localStorage.getItem("particlex-aside-status") === "hide") {
+                    root.classList.add("hide-aside");
+                }
+            } catch (e) {}
         })();
     </script>
     <div
@@ -345,7 +350,29 @@
         </transition>
         
     </div>
-    <script src="/js/particlex-main.js?v=20260701-link-parallax-strong"></script>
+    <div id="rightside">
+    <div id="rightside-config-hide">
+        <button id="rightside-darkmode" type="button" title="浅色和深色模式转换">
+            <i class="fa-solid fa-adjust"></i>
+        </button>
+        
+    </div>
+    <div id="rightside-config-show">
+        <button id="rightside-config" type="button" title="设置">
+            <i class="fa-solid fa-gear fa-spin"></i>
+        </button>
+        <a id="rightside-chat" href="/comment/" title="聊天">
+            <i class="fa-solid fa-sms"></i>
+        </a>
+        <button id="rightside-go-up" type="button" title="回到顶部">
+            <span class="scroll-percent"></span>
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+    </div>
+</div>
+
+    <script src="/js/particlex-main.js?v=20260829-perf2"></script>
+    <script src="/js/rightside.js?v=20260829-5"></script>
     
 </body>
 </html>
